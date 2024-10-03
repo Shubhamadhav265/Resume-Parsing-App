@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
-from flask_cors import CORS  # Import Flask-CORS
+from flask_cors import CORS
+from flask_mysqldb import MySQL
 import google.generativeai as genai
 from PyPDF2 import PdfReader
 import os
@@ -10,6 +11,14 @@ load_dotenv()
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
+
+# MySQL configuration
+app.config['MYSQL_HOST'] = 'localhost'
+app.config['MYSQL_USER'] = os.getenv('MYSQL_USER')  # Add your MySQL username in the .env file
+app.config['MYSQL_PASSWORD'] = os.getenv('MYSQL_PASSWORD')  # Add your MySQL password in the .env file
+app.config['MYSQL_DB'] = os.getenv('MYSQL_DB')  # Add your database name in the .env file
+
+mysql = MySQL(app)
 
 @app.route('/upload', methods=['POST'])
 def upload_resume():
@@ -70,24 +79,21 @@ def create_job_posting():
     other_skills = data.get('other_skills')
     package = data.get('package')
     stipend_amount = data.get('stipend_amount')
+    user_id = data.get('user_id')  # Add user_id to associate with the posting
 
-    # Here you would typically save the job posting to the database
-    # For demonstration, we will just return the received data
-    # Add your database saving logic here
+    cursor = mysql.connection.cursor()
 
-    return jsonify({
-        'message': 'Job posting created successfully',
-        'job_posting': {
-            'company_name': company_name,
-            'job_description': job_description,
-            'role': role,
-            'primary_skills': primary_skills,
-            'secondary_skills': secondary_skills,
-            'other_skills': other_skills,
-            'package': package,
-            'stipend_amount': stipend_amount,
-        }
-    }), 201
+    try:
+        cursor.execute('''INSERT INTO Job_Postings (user_id, title, description, primary_skills, secondary_skills, other_skills) 
+                          VALUES (%s, %s, %s, %s, %s, %s)''',
+                       (user_id, role, job_description, primary_skills, secondary_skills, other_skills))
+        mysql.connection.commit()
+        return jsonify({'message': 'Job posting created successfully'}), 201
+    except Exception as e:
+        mysql.connection.rollback()
+        return jsonify({'error': str(e)}), 500
+    finally:
+        cursor.close()
 
 
 if __name__ == '__main__':
