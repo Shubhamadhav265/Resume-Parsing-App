@@ -25,7 +25,12 @@ def upload_resume():
     if not resume_text:
         return jsonify({'error': 'Failed to extract text from the PDF'}), 500
 
-    prompt = f"Extract the skills from the following resume text:\n{resume_text}"
+    prompt = f"""From the following resume text, extract all skills mentioned under any 
+                                section labeled 'Technical Skills,' 'Skills,' 'Soft Skills' or similar. Return 
+                                only the skills as a comma-separated list, with no additional information or 
+                                formatting. Ensure the output is in a single line and consistent across 
+                                multiple runs. **Resume**:\n{resume_text}"""
+    
     skills = get_gemini_response(prompt)
 
     if skills is None:
