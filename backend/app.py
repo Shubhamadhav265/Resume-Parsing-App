@@ -58,5 +58,37 @@ def get_gemini_response(prompt):
         print(f"Error with API call: {e}")
         return None
 
+
+@app.route('/job-posting', methods=['POST'])
+def create_job_posting():
+    data = request.get_json()
+    company_name = data.get('company_name')
+    job_description = data.get('job_description')
+    role = data.get('role')
+    primary_skills = data.get('primary_skills')
+    secondary_skills = data.get('secondary_skills')
+    other_skills = data.get('other_skills')
+    package = data.get('package')
+    stipend_amount = data.get('stipend_amount')
+
+    # Here you would typically save the job posting to the database
+    # For demonstration, we will just return the received data
+    # Add your database saving logic here
+
+    return jsonify({
+        'message': 'Job posting created successfully',
+        'job_posting': {
+            'company_name': company_name,
+            'job_description': job_description,
+            'role': role,
+            'primary_skills': primary_skills,
+            'secondary_skills': secondary_skills,
+            'other_skills': other_skills,
+            'package': package,
+            'stipend_amount': stipend_amount,
+        }
+    }), 201
+
+
 if __name__ == '__main__':
     app.run(debug=True)
