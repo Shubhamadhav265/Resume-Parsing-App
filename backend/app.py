@@ -36,9 +36,9 @@ def upload_resume():
         return jsonify({'error': 'No selected file'}), 400
 
     user_id = request.form.get('user_id', 1)
-    if not user_id:
-        return jsonify({'error': 'User ID is required'}), 400
-        
+    job_id = request.form.get('job_id', 1)  # Get the job ID from the request
+    if not user_id or not job_id:
+        return jsonify({'error': 'User ID and Job ID are required'}), 400
 
     # Save the uploaded file
     file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
@@ -54,10 +54,10 @@ def upload_resume():
 
     # Use Gemini to extract skills
     prompt = f"""From the following resume text, extract all skills mentioned under any 
-                                section labeled 'Technical Skills,' 'Skills,' 'Soft Skills' or similar. Return 
-                                only the skills as a comma-separated list, with no additional information or 
-                                formatting. Ensure the output is in a single line and consistent across 
-                                multiple runs. **Resume**:\n{resume_text}"""
+                    section labeled 'Technical Skills,' 'Skills,' 'Soft Skills' or similar. Return 
+                    only the skills as a comma-separated list, with no additional information or 
+                    formatting. Ensure the output is in a single line and consistent across 
+                    multiple runs. **Resume**:\n{resume_text}"""
     
     skills = get_gemini_response(prompt)
     if skills is None:
@@ -66,14 +66,27 @@ def upload_resume():
     # Insert the resume into the Resumes table
     try:
         cursor = mysql.connection.cursor()
-        cursor.execute('''INSERT INTO Resumes (user_id, file_path, status, feedback) 
+        cursor.execute('''INSERT INTO Resumes (user_id, file_path, status, skills) 
                           VALUES (%s, %s, 'Pending', %s)''', (user_id, file_path, skills))
+        resume_id = cursor.lastrowid  # Get the ID of the inserted resume
         mysql.connection.commit()
     except Exception as e:
         mysql.connection.rollback()
         return jsonify({'error': f"Database error: {e}"}), 500
     finally:
         cursor.close()
+
+    # # Insert into the Applications table
+    # try:
+    #     cursor = mysql.connection.cursor()
+    #     cursor.execute('''INSERT INTO Applications (job_id, user_id, resume_id, status) 
+    #                       VALUES (%s, %s, %s, 'Pending')''', (job_id, user_id, resume_id))
+    #     mysql.connection.commit()
+    # except Exception as e:
+    #     mysql.connection.rollback()
+    #     return jsonify({'error': f"Failed to update Applications table: {e}"}), 500
+    # finally:
+    #     cursor.close()
 
     return jsonify({'message': 'Resume uploaded and processed successfully', 'skills': skills})
 
@@ -96,8 +109,6 @@ def get_gemini_response(prompt):
     except Exception as e:
         print(f"Error with API call: {e}")
         return None
-
-
 
 @app.route('/job-posting', methods=['POST'])
 def create_job_posting():
