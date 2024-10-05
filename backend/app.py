@@ -97,6 +97,8 @@ def get_gemini_response(prompt):
         print(f"Error with API call: {e}")
         return None
 
+
+
 @app.route('/job-posting', methods=['POST'])
 def create_job_posting():
     data = request.get_json()
@@ -110,7 +112,7 @@ def create_job_posting():
     other_skills = data.get('other_skills')
     package = data.get('package')
     stipend_amount = data.get('stipend_amount')
-    user_id = data.get('user_id')  # Add user_id to associate with the posting
+    user_id = data.get('user_id', 1)  # Add user_id to associate with the posting
 
     if not all([company_name, job_description, role, primary_skills, user_id]):
         return jsonify({'error': 'Missing required fields'}), 400
