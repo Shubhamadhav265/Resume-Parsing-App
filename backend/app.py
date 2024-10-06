@@ -171,6 +171,140 @@ def validate_contact_number(contact_number):
     return re.match(r"^\d{10}$", contact_number)
 
 
+@app.route('/candidate-signin', methods=['POST'])
+def candidate_signin():
+    try:
+        # Log the request data
+        print("Received sign-in request")
+
+        data = request.get_json()
+        print(f"Request data: {data}")
+
+        email = data.get('email')
+        password = data.get('password')
+
+        # Log extracted data
+        print(f"Extracted email: {email}, password: {password}")
+
+        # Check for missing fields
+        if not all([email, password]):
+            print("Missing fields in the request")
+            return jsonify({'error': 'All fields are required'}), 400
+
+        cursor = mysql.connection.cursor()
+
+        try:
+            # Log the database query
+            print(f"Querying user with email: {email}")
+            cursor.execute("SELECT * FROM Users WHERE email = %s", (email,))
+            user = cursor.fetchone()
+
+            # Check if user exists
+            if not user:
+                print("User does not exist")
+                return jsonify({'error': 'User does not exist'}), 404
+
+            print(f"User found: {user}")
+            
+            # Check if the user is an Candidate
+            if user[3] != 'candidate':  # Assuming user[3] is the role
+                print("User is not an HR")
+                return jsonify({'error': 'User is not authorized as Candidate'}), 403
+
+            # Check password
+            if not bcrypt.check_password_hash(user[2], password):  # Assuming user[1] is the hashed password
+                print("Incorrect password")
+                return jsonify({'error': 'Incorrect password'}), 400
+
+            # Successful sign-in
+            print("Candidate signed in successfully")
+            return jsonify({'message': 'Candidate signed in successfully'}), 200
+
+        except Exception as db_error:
+            # Log the database error
+            print(f"Database error: {db_error}")
+            mysql.connection.rollback()
+            return jsonify({'error': str(db_error)}), 500
+
+        finally:
+            cursor.close()
+            print("Cursor closed")
+
+    except Exception as e:
+        # Log any other errors
+        print(f"Error occurred: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/hr-signin', methods=['POST'])
+def hr_signin():
+    try:
+        # Log the request data
+        print("Received HR sign-in request")
+
+        data = request.get_json()
+        print(f"Request data: {data}")
+
+        email = data.get('email')
+        password = data.get('password')
+
+        # Log extracted data
+        print(f"Extracted email: {email}, password: [HIDDEN]")
+
+        # Check for missing fields
+        if not all([email, password]):
+            print("Missing fields in the request")
+            return jsonify({'error': 'All fields are required'}), 400
+
+        cursor = mysql.connection.cursor()
+
+        try:
+            # Log the database query
+            print(f"Querying user with email: {email}")
+            cursor.execute("SELECT * FROM Users WHERE email = %s", (email,))
+            user = cursor.fetchone()
+
+            # Check if user exists
+            if not user:
+                print("User does not exist")
+                return jsonify({'error': 'User does not exist'}), 404
+
+            print(f"User found: {user}")
+
+            # Check if the user is an HR
+            if user[3] != 'HR':  # Assuming user[3] is the role
+                print("User is not an HR")
+                return jsonify({'error': 'User is not authorized as HR'}), 403
+
+            # Log the hashed password
+            hashed_password = user[2]  # Assuming user[2] is the hashed password
+            print(f"Hashed password from DB: {hashed_password}")
+
+            # Check password
+            if not bcrypt.check_password_hash(hashed_password, password):
+                print("Incorrect password")
+                return jsonify({'error': 'Incorrect password'}), 400
+
+            # Successful sign-in
+            print("HR signed in successfully")
+            return jsonify({'message': 'HR signed in successfully'}), 200
+
+        except Exception as db_error:
+            # Log the database error
+            print(f"Database error: {db_error}")
+            mysql.connection.rollback()
+            return jsonify({'error': str(db_error)}), 500
+
+        finally:
+            cursor.close()
+            print("Cursor closed")  
+
+    except Exception as e:
+        # Log any other errors
+        print(f"Error occurred: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
 @app.route('/upload', methods=['POST'])
 def upload_resume():
     if 'file' not in request.files:
