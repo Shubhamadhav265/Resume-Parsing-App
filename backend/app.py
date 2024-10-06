@@ -99,14 +99,6 @@ def HR_signup():
 
     finally:
         cursor.close()
-# def validate_email(email):
-#     return re.match(r"[^@]+@[^@]+\.[^@]+", email)
-
-# def validate_password(password):
-#     return len(password) >= 8
-
-# def validate_contact_number(contact_number):
-#     return re.match(r"^\d{10}$", contact_number)
 
 
 @app.route('/candidate-signup', methods=['POST'])
