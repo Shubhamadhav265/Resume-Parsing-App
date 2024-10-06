@@ -1,22 +1,32 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, json, jsonify
 from flask_cors import CORS
 from flask_mysqldb import MySQL
 import google.generativeai as genai
 from PyPDF2 import PdfReader
 import os
+import spacy
 from dotenv import load_dotenv
+from services.predef_skills import predefined_skills, standard_certifications
+from services.model_fun import extract_skills, match_skills
+import re
 
-# Load environment variables from .env file
+# Loading environment variables from .env file
 load_dotenv()
 
+# Loading a pre-trained NLP model
+nlp = spacy.load("en_core_web_sm")
+
+# # Configuring the Grmini-Pro API
+# genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
+CORS(app)  # Enabling CORS for all routes
 
 # MySQL configuration
 app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = os.getenv('MYSQL_USER')  # Add your MySQL username in the .env file
-app.config['MYSQL_PASSWORD'] = os.getenv('MYSQL_PASSWORD')  # Add your MySQL password in the .env file
-app.config['MYSQL_DB'] = os.getenv('MYSQL_DB')  # Add your database name in the .env file
+app.config['MYSQL_USER'] = os.getenv('MYSQL_USER')  # Adding our MySQL username in the .env file
+app.config['MYSQL_PASSWORD'] = os.getenv('MYSQL_PASSWORD')  # Adding our MySQL password in the .env file
+app.config['MYSQL_DB'] = os.getenv('MYSQL_DB')  # Adding our database name in the .env file
 
 mysql = MySQL(app)
 
@@ -25,6 +35,7 @@ UPLOAD_FOLDER = 'uploads'
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
 
 @app.route('/upload', methods=['POST'])
 def upload_resume():
@@ -36,38 +47,42 @@ def upload_resume():
         return jsonify({'error': 'No selected file'}), 400
 
     user_id = request.form.get('user_id', 1)
-    job_id = request.form.get('job_id', 1)  # Get the job ID from the request
+    job_id = request.form.get('job_id', 1)  # Getting the job ID from the request
     if not user_id or not job_id:
         return jsonify({'error': 'User ID and Job ID are required'}), 400
 
-    # Save the uploaded file
+    # Saving the uploaded file
     file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
     try:
         file.save(file_path)
     except Exception as e:
         return jsonify({'error': f"Failed to save the file: {e}"}), 500
 
-    # Extract text from the PDF file
+    # Extracting text from the PDF file
     resume_text = extract_text_from_pdf(file_path)
     if not resume_text:
         return jsonify({'error': 'Failed to extract text from the PDF'}), 500
 
-    # Use Gemini to extract skills
-    prompt = f"""From the following resume text, extract all skills mentioned under any 
-                    section labeled 'Technical Skills,' 'Skills,' 'Soft Skills' or similar. Return 
-                    only the skills as a comma-separated list, with no additional information or 
-                    formatting. Ensure the output is in a single line and consistent across 
-                    multiple runs. **Resume**:\n{resume_text}"""
-    
-    skills = get_gemini_response(prompt)
+    skills_extraction = f""" From the following resume text, extract all skills mentioned under any 
+                            section labeled 'Technical Skills,' 'Skills,' or similar. Return 
+                            only the skills as a comma-separated list, with no additional information or 
+                            formatting. Ensure the output is in a single line and consistent across 
+                            multiple runs. **Resume**: {resume_text} """
+
+    skills = get_gemini_response(skills_extraction)
     if skills is None:
         return jsonify({'error': 'Failed to extract skills'}), 500
 
-    # Insert the resume into the Resumes table
+    resume_skills = extract_skills(skills)
+    # Converting list to String to consider it as an single value for the database storation
+    skills_string = ', '.join(resume_skills)
+    print(skills_string)
+
+    # Inserting the resume submission into the Resumes DB table
     try:
         cursor = mysql.connection.cursor()
         cursor.execute('''INSERT INTO Resumes (user_id, file_path, status, skills) 
-                          VALUES (%s, %s, 'Pending', %s)''', (user_id, file_path, skills))
+                          VALUES (%s, %s, 'Pending', %s)''', (user_id, file_path, skills_string))
         resume_id = cursor.lastrowid  # Get the ID of the inserted resume
         mysql.connection.commit()
     except Exception as e:
@@ -76,19 +91,133 @@ def upload_resume():
     finally:
         cursor.close()
 
-    # # Insert into the Applications table
-    # try:
-    #     cursor = mysql.connection.cursor()
-    #     cursor.execute('''INSERT INTO Applications (job_id, user_id, resume_id, status) 
-    #                       VALUES (%s, %s, %s, 'Pending')''', (job_id, user_id, resume_id))
-    #     mysql.connection.commit()
-    # except Exception as e:
-    #     mysql.connection.rollback()
-    #     return jsonify({'error': f"Failed to update Applications table: {e}"}), 500
-    # finally:
-    #     cursor.close()
+    # Compulsorily should be in String Format
+    Primary_Skills = "Java, Python, SQL, Git, Linux, AWS, Docker, Kubernetes, MySQL Workbench, OpenShift, CyberSecurity"
+    Secondary_Skills = "Tkinter, Express.js, BootStrap, SMTP, Object-Oriented Programming (OOP), Data Structures and Algorithms, Cloudinary, JavaScript, Slack"
+    Other_Skills = "React.js, Node.js, Azure, GitHub, JUnit, Selenium, MongoDB, PostgreSQL, TensorFlow"
 
-    return jsonify({'message': 'Resume uploaded and processed successfully', 'skills': skills})
+    jd_Primary_Skills = extract_skills(Primary_Skills)
+    jd_Secondary_Skills = extract_skills(Secondary_Skills)
+    jd_Other_Skills = extract_skills(Other_Skills)
+
+    # Match skills
+    Pri_matching_skills, Pri_missing_skills = match_skills(resume_skills, jd_Primary_Skills)
+    Sec_matching_skills, Sec_missing_skills = match_skills(resume_skills, jd_Secondary_Skills)
+    Oth_matching_skills, Oth_missing_skills = match_skills(resume_skills, jd_Other_Skills)
+    
+    # Testing output (only)
+    Pskills_string = ', '.join(Pri_matching_skills)
+
+    # Percentage Primary, Secondary and Other Skill match
+    per_primary_skill_match = round((len(Pri_matching_skills)/(len(Pri_matching_skills) + len(Pri_missing_skills)))*100, 2)
+    per_secondary_skill_match = round((len(Sec_matching_skills)/(len(Sec_matching_skills) + len(Sec_missing_skills)))*100, 2)
+    per_other_skill_match = round((len(Oth_matching_skills)/(len(Oth_matching_skills) + len(Oth_missing_skills)))*100, 2)
+
+    input_prompt = f"""
+        As an advanced Application Tracking System (ATS) with expertise in the tech field, analyze the following resume and provide a response in a single string with the following structure:
+
+        {{
+            "all_skills": [], 
+            "work_skills": [], 
+            "project_skills": [], 
+            "total_publications": 0, 
+            "copyrights": 0, 
+            "patents": 0, 
+            "certifications": [], 
+            "hackathon_participation": 0
+        }}
+
+        1. **all_skills**: A list of all skills mentioned in the resume.
+        2. **work_skills**: A list of skills specifically mentioned or inferred from the work experience section of the resume.
+        3. **project_skills**: A list of skills used or learned from the project section of the resume.
+        4. **total_publications**: The total count of publications mentioned in the resume.
+        5. **copyrights**: The total count of copyrights mentioned in the resume.
+        6. **patents**: The total count of patents mentioned in the resume.
+        7. **certifications**: A list of certifications mentioned in the resume.
+        8. **hackathon_participation**: A Flag value indicating if hackathon participation is mentioned (If yes, return 1, else return 0).
+
+        **Resume**: {resume_text}
+        """
+
+    # Extracting the prompt Response and Multiple Resume Details
+    gem_response = get_gemini_response(input_prompt)
+
+    if gem_response:
+                try:
+                    # Try to parse the response as JSON
+                    gem_response_data = json.loads(gem_response)
+
+                    # Store the Workeperience, Project, Publications, Patent, Copyright, Certifications and Hackathons
+                    # in the form of List's
+                    work_skills = gem_response_data["work_skills"]
+                    project_skills = gem_response_data["project_skills"]
+                    total_publications = gem_response_data["total_publications"]
+                    copyrights = gem_response_data["copyrights"]
+                    patents = gem_response_data["patents"]
+                    certifications = gem_response_data["certifications"]
+                    hackathon_participation = gem_response_data["hackathon_participation"]
+
+
+                    # Refining Skills once again with the predefined skills
+                    ref_work_skills = extract_skills(' '.join(work_skills))  # Convert list to string
+                    ref_project_skills = extract_skills(' '.join(project_skills))  # Convert list to string
+
+                    # Work & Project skills present in the skill section of the resume
+                    skillmatch_work_skills, skillmiss_work_skills = match_skills(ref_work_skills, resume_skills)
+                    skillmatch_proj_skills, skillmiss_proj_skills = match_skills(ref_project_skills, resume_skills)
+                                            
+                    # Matching the work and project skills with primary and secondary skills
+                    Pri_work_matching_skills, Pri_work_missing_skills = match_skills(skillmatch_work_skills, jd_Primary_Skills)
+                    Sec_work_matching_skills, Sec_work_missing_skills = match_skills(skillmatch_work_skills, jd_Secondary_Skills)
+                    
+                    Pri_project_matching_skills, Pri_project_missing_skills = match_skills(skillmatch_proj_skills, jd_Primary_Skills)
+                    Sec_project_matching_skills, Sec_project_missing_skills = match_skills(skillmatch_proj_skills, jd_Secondary_Skills)
+
+
+                    # Percentage match of the primary and secondary skills of  work and project respectively.
+                    per_pri_work_matching_skills = round(((len(Pri_work_matching_skills))/(len(jd_Primary_Skills))) * 100, 2)
+                    per_sec_work_matching_skills = round(((len(Sec_work_matching_skills))/(len(jd_Secondary_Skills))) * 100, 2)
+
+                    per_pri_project_matching_skills = round(((len(Pri_project_matching_skills))/(len(jd_Primary_Skills))) * 100, 2)
+                    per_sec_project_matching_skills = round(((len(Sec_project_matching_skills))/(len(jd_Secondary_Skills))) * 100, 2)
+
+                    # Sum of Publications, Copyrights and Patents and the final percentage score calculation
+                    filing_total = total_publications + copyrights + patents
+                    per_filing_score = 0
+                    if filing_total >= 1:
+                        per_filing_score = 5
+                    else:
+                        per_filing_score = 0
+
+                    # Certifications Score Calculation
+                    matching_certifications = set(certifications).intersection(standard_certifications)
+                    count_matching_std_certifications = len(matching_certifications)
+                    
+                    per_certi_Score = 0
+                    if count_matching_std_certifications >= 1:
+                        per_certi_Score = 5
+                    else:
+                        per_certi_Score = 3
+
+                    
+                    # Hackathon Score Calculation
+                    per_hackathon_score = 0
+                    if hackathon_participation == 1:
+                        per_hackathon_score = 4
+                    else:
+                        per_hackathon_score = 0
+
+                    # Final Rubrick Formula
+                    Final_score = (0.4 * per_primary_skill_match) + (0.2 * per_secondary_skill_match) + (0.1 * per_other_skill_match) + (0.056 * per_pri_work_matching_skills) + (0.024 * per_sec_work_matching_skills) + (0.056 * per_pri_project_matching_skills) + (0.024 * per_sec_project_matching_skills) + (per_filing_score) + (per_certi_Score) + (per_hackathon_score) 
+                except Exception as e:
+                    return jsonify({'error': f"Failed to parse JSON response: {e}"}), 500 
+
+
+    else:
+        return jsonify({'error': f"Gemini API call failed or returned an empty response: {e}"}), 400
+
+    return jsonify({'message': 'Resume uploaded and processed successfully', 'skills': Final_score})
+
 
 def extract_text_from_pdf(file_path):
     try:
@@ -100,6 +229,23 @@ def extract_text_from_pdf(file_path):
     except Exception as e:
         print(f"Error reading PDF file: {e}")
         return None
+
+def extract_skills(resume_text):
+
+    # Processing the resume text
+    doc = nlp(resume_text)
+
+    # Extracting skills
+    extracted_skills = []
+    
+    # Checking for multi-word skills
+    for skill in predefined_skills:
+        # Using regex to match whole phrases in the resume text
+        if re.search(r'\b' + re.escape(skill) + r'\b', resume_text):
+            extracted_skills.append(skill)
+
+    # Removing duplicates
+    return list(set(extracted_skills))
 
 def get_gemini_response(prompt):
     try:

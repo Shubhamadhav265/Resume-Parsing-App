@@ -1,2 +1,5 @@
 venv
+.venv
 .env
+model.py
+latestbackendBackup.py
