@@ -4,6 +4,8 @@ import UploadResume from "./UploadResume";
 import JobPosting from "./JobPosting";
 import CandSignup from "./components/candSignUp"; // Importing the existing candidate signup component
 import HRSignup from "./components/HRSignUp"; // Importing the existing HR signup component
+import CandSignIn from "./components/candSignIn" // Importing the existing candidate signin component
+import HRSignIn from "./components/HRSignIn"; // Importing the existing HR signin component
 
 const App = () => {
   return (
@@ -34,6 +36,18 @@ const App = () => {
               </Link>{" "}
               {/* Link to HR signup */}
             </li>
+            <li style={styles.navItem}>
+              <Link to="/candidate-signin" style={styles.navLink}>
+                Candidate Signin
+              </Link>{" "}
+              {/* Link to Candidate Signin */}
+            </li>
+            <li style={styles.navItem}>
+              <Link to="/hr-signin" style={styles.navLink}>
+                HR Signin
+              </Link>{" "}
+              {/* Link to HR Signin */}
+            </li>
           </ul>
         </nav>
         <div style={styles.container}>
@@ -44,6 +58,10 @@ const App = () => {
             {/* Route for candidate signup */}
             <Route path="/hr-signup" element={<HRSignup />} />{" "}
             {/* Route for HR signup */}
+            <Route path="/candidate-signin" element={<CandSignIn />} />{" "}
+            {/* Route for Candidate signUp */}
+            <Route path="/hr-signin" element={<HRSignIn />} />{" "}
+            {/* Route for HR signIn */}
           </Routes>
         </div>
       </div>

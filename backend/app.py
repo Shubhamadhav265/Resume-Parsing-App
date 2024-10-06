@@ -225,7 +225,7 @@ def upload_resume():
     finally:
         cursor.close()
 
-    # Compulsorily should be in String Format
+    # Compulsorily should be in String Format (Originally needed to be accessed from the DataBase)
     Primary_Skills = "Java, Python, SQL, Git, Linux, AWS, Docker, Kubernetes, MySQL Workbench, OpenShift, CyberSecurity"
     Secondary_Skills = "Tkinter, Express.js, BootStrap, SMTP, Object-Oriented Programming (OOP), Data Structures and Algorithms, Cloudinary, JavaScript, Slack"
     Other_Skills = "React.js, Node.js, Azure, GitHub, JUnit, Selenium, MongoDB, PostgreSQL, TensorFlow"
