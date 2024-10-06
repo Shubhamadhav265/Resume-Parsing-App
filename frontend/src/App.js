@@ -2,7 +2,8 @@ import React from "react";
 import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom";
 import UploadResume from "./UploadResume";
 import JobPosting from "./JobPosting";
-import CandSignup from "./components/candSignUp"; // Import the existing candidate signup component
+import CandSignup from "./components/candSignUp"; // Importing the existing candidate signup component
+import HRSignup from "./components/HRSignUp"; // Importing the existing HR signup component
 
 const App = () => {
   return (
@@ -27,6 +28,12 @@ const App = () => {
               </Link>{" "}
               {/* Link to candidate signup */}
             </li>
+            <li style={styles.navItem}>
+              <Link to="/hr-signup" style={styles.navLink}>
+                HR Signup
+              </Link>{" "}
+              {/* Link to HR signup */}
+            </li>
           </ul>
         </nav>
         <div style={styles.container}>
@@ -35,6 +42,8 @@ const App = () => {
             <Route path="/job-posting" element={<JobPosting />} />
             <Route path="/candidate-signup" element={<CandSignup />} />{" "}
             {/* Route for candidate signup */}
+            <Route path="/hr-signup" element={<HRSignup />} />{" "}
+            {/* Route for HR signup */}
           </Routes>
         </div>
       </div>

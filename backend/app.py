@@ -43,6 +43,72 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 def home():
     return "Welcome to the Resume Parsing App Backend!"
 
+@app.route('/hr-signup', methods=['POST'])
+def HR_signup():
+    data = request.get_json()
+
+    full_name = data.get('full_name')
+    email = data.get('email')
+    contact_number = data.get('contact_number')
+    company_name = data.get('company_name')
+    position = data.get('position')
+    password = data.get('password')
+    confirm_password = data.get('confirm_password')
+
+    if not all([full_name, email, contact_number, company_name, position, password, confirm_password]):
+        return jsonify({'error': 'All fields are required'}), 400
+    
+    if not validate_email(email):
+        return jsonify({'error': 'Invalid email format'}), 400
+    
+    if not validate_contact_number(contact_number):
+        return jsonify({'error': 'Invalid contact number format. Must be 10 digits.'}), 400
+
+    if not validate_password(password):
+        return jsonify({'error': 'Password must be at least 8 characters long'}), 400
+
+    if password != confirm_password:
+        return jsonify({'error': 'Passwords do not match'}), 400
+
+    hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+
+    cursor = mysql.connection.cursor()
+
+    cursor.execute("SELECT * FROM Users WHERE email = %s", (email,))
+    existing_user = cursor.fetchone()
+    if existing_user:
+        return jsonify({'error': 'Email is already registered'}), 400
+
+    try:
+        cursor.execute('''INSERT INTO Users (email, password, role) VALUES (%s, %s, 'HR')''', 
+                       (email, hashed_password))
+        mysql.connection.commit()
+
+        user_id = cursor.lastrowid
+
+        cursor.execute('''INSERT INTO HR_Info (user_id, full_name, contact_number, company_name, position) 
+                          VALUES (%s, %s, %s, %s, %s)''', 
+                       (user_id, full_name, contact_number, company_name, position))
+        mysql.connection.commit()
+
+        return jsonify({'message': 'Candidate signed up successfully'}), 201
+
+    except Exception as e:
+        mysql.connection.rollback()
+        return jsonify({'error': str(e)}), 500
+
+    finally:
+        cursor.close()
+# def validate_email(email):
+#     return re.match(r"[^@]+@[^@]+\.[^@]+", email)
+
+# def validate_password(password):
+#     return len(password) >= 8
+
+# def validate_contact_number(contact_number):
+#     return re.match(r"^\d{10}$", contact_number)
+
+
 @app.route('/candidate-signup', methods=['POST'])
 def candidate_signup():
     data = request.get_json()
