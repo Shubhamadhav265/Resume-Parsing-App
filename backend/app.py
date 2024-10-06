@@ -77,7 +77,7 @@ def HR_signup():
     cursor.execute("SELECT * FROM Users WHERE email = %s", (email,))
     existing_user = cursor.fetchone()
     if existing_user:
-        return jsonify({'error': 'Email is already registered'}), 400
+        return jsonify({'error': 'Your Email is already registered'}), 400
 
     try:
         cursor.execute('''INSERT INTO Users (email, password, role) VALUES (%s, %s, 'HR')''', 
@@ -91,7 +91,7 @@ def HR_signup():
                        (user_id, full_name, contact_number, company_name, position))
         mysql.connection.commit()
 
-        return jsonify({'message': 'Candidate signed up successfully'}), 201
+        return jsonify({'message': 'HR signed up successfully'}), 201
 
     except Exception as e:
         mysql.connection.rollback()
@@ -138,7 +138,7 @@ def candidate_signup():
     cursor.execute("SELECT * FROM Users WHERE email = %s", (email,))
     existing_user = cursor.fetchone()
     if existing_user:
-        return jsonify({'error': 'Email is already registered'}), 400
+        return jsonify({'error': 'Your Email is already registered'}), 400
 
     try:
         cursor.execute('''INSERT INTO Users (email, password, role) VALUES (%s, %s, 'Candidate')''', 
