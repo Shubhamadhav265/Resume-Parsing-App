@@ -10,6 +10,8 @@ from dotenv import load_dotenv
 from services.predef_skills import predefined_skills, standard_certifications
 from services.model_fun import extract_skills, match_skills
 import re
+from flask_jwt_extended import create_access_token
+from flask_jwt_extended import JWTManager
 
 # Loading environment variables from .env file
 load_dotenv()
@@ -31,6 +33,9 @@ app.config['MYSQL_PASSWORD'] = os.getenv('MYSQL_PASSWORD')  # Adding our MySQL p
 app.config['MYSQL_DB'] = os.getenv('MYSQL_DB')  # Adding our database name in the .env file
 
 mysql = MySQL(app)
+
+app.config['JWT_SECRET_KEY'] = "dc2c05b89d0ce97242bf8a51e21117a394454e10515b92cadedf1d704732f684"
+jwt = JWTManager(app)
 
 # Directory to store uploaded resumes
 UPLOAD_FOLDER = 'uploads'
@@ -207,14 +212,17 @@ def candidate_signin():
             print(f"User found: {user}")
             
             # Check if the user is an Candidate
-            if user[3] != 'candidate':  # Assuming user[3] is the role
-                print("User is not an HR")
+            if user[3] != 'Candidate':  # Assuming user[3] is the role
+                print("User is not an Candidate")
                 return jsonify({'error': 'User is not authorized as Candidate'}), 403
 
             # Check password
             if not bcrypt.check_password_hash(user[2], password):  # Assuming user[1] is the hashed password
                 print("Incorrect password")
                 return jsonify({'error': 'Incorrect password'}), 400
+
+            # Here we'r generating access_token for the signedin user_id
+            print(create_access_token(identity=user[0]))
 
             # Successful sign-in
             print("Candidate signed in successfully")
@@ -284,6 +292,9 @@ def hr_signin():
             if not bcrypt.check_password_hash(hashed_password, password):
                 print("Incorrect password")
                 return jsonify({'error': 'Incorrect password'}), 400
+
+            # Here we'r generating access_token for the signedin user_id
+            print(create_access_token(identity=user[0]))
 
             # Successful sign-in
             print("HR signed in successfully")
