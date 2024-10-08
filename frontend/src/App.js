@@ -6,6 +6,9 @@ import CandSignup from "./components/candSignUp"; // Importing the existing cand
 import HRSignup from "./components/HRSignUp"; // Importing the existing HR signup component
 import CandSignIn from "./components/candSignIn" // Importing the existing candidate signin component
 import HRSignIn from "./components/HRSignIn"; // Importing the existing HR signin component
+import LandingPage from "./components/LandingPage"; //Importing the existing Landinag Page
+import CandDashboard from "./components/CandDashBoard";
+import HrDashboard from "./components/HrDashBoard";
 
 const App = () => {
   return (
@@ -14,8 +17,13 @@ const App = () => {
         <h1 style={styles.title}>Recruitment Portal</h1>
         <nav style={styles.nav}>
           <ul style={styles.navList}>
-            <li style={styles.navItem}>
+          <li style={styles.navItem}>
               <Link to="/" style={styles.navLink}>
+                Home
+              </Link>
+            </li>
+            <li style={styles.navItem}>
+              <Link to="/upload" style={styles.navLink}>
                 Upload Resume
               </Link>
             </li>
@@ -52,7 +60,8 @@ const App = () => {
         </nav>
         <div style={styles.container}>
           <Routes>
-            <Route path="/" element={<UploadResume />} />
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/upload" element={<UploadResume />} />
             <Route path="/job-posting" element={<JobPosting />} />
             <Route path="/candidate-signup" element={<CandSignup />} />{" "}
             {/* Route for candidate signup */}
@@ -62,6 +71,8 @@ const App = () => {
             {/* Route for Candidate signUp */}
             <Route path="/hr-signin" element={<HRSignIn />} />{" "}
             {/* Route for HR signIn */}
+            <Route path="/hr-dashboard" element={<HrDashboard />} />
+            <Route path="/cand-dashboard" element={<CandDashboard />} />
           </Routes>
         </div>
       </div>

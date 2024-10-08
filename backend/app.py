@@ -11,7 +11,9 @@ from services.predef_skills import predefined_skills, standard_certifications
 from services.model_fun import extract_skills, match_skills
 import re
 from flask_jwt_extended import create_access_token
-from flask_jwt_extended import JWTManager
+from flask_jwt_extended import JWTManager, jwt_required
+from flask import session
+from datetime import timedelta
 
 # Loading environment variables from .env file
 load_dotenv()
@@ -36,6 +38,9 @@ mysql = MySQL(app)
 
 app.config['JWT_SECRET_KEY'] = "dc2c05b89d0ce97242bf8a51e21117a394454e10515b92cadedf1d704732f684"
 jwt = JWTManager(app)
+
+app.secret_key = os.getenv('SECRET_KEY')
+app.permanent_session_lifetime = timedelta(minutes=30)
 
 # Directory to store uploaded resumes
 UPLOAD_FOLDER = 'uploads'
@@ -183,6 +188,10 @@ def candidate_signin():
         print("Received sign-in request")
 
         data = request.get_json()
+        if not data:
+            print("No JSON data found in the request")
+            return jsonify({'error': 'Invalid request, no data found'}), 400
+
         print(f"Request data: {data}")
 
         email = data.get('email')
@@ -193,7 +202,7 @@ def candidate_signin():
 
         # Check for missing fields
         if not all([email, password]):
-            print("Missing fields in the request")
+            print("Missing email or password")
             return jsonify({'error': 'All fields are required'}), 400
 
         cursor = mysql.connection.cursor()
@@ -206,43 +215,51 @@ def candidate_signin():
 
             # Check if user exists
             if not user:
-                print("User does not exist")
+                print(f"User with email {email} does not exist")
                 return jsonify({'error': 'User does not exist'}), 404
 
             print(f"User found: {user}")
-            
-            # Check if the user is an Candidate
-            if user[3] != 'Candidate':  # Assuming user[3] is the role
-                print("User is not an Candidate")
+
+            # Check if the user is a Candidate
+            if user[3] != 'Candidate':  # Assuming user[3] is the role column
+                print(f"User with email {email} is not a Candidate")
                 return jsonify({'error': 'User is not authorized as Candidate'}), 403
 
             # Check password
-            if not bcrypt.check_password_hash(user[2], password):  # Assuming user[1] is the hashed password
-                print("Incorrect password")
+            if not bcrypt.check_password_hash(user[2], password):  # Assuming user[2] is the hashed password
+                print("Incorrect password for user")
                 return jsonify({'error': 'Incorrect password'}), 400
 
-            # Here we'r generating access_token for the signedin user_id
-            print(create_access_token(identity=user[0]))
+            # Save user_id in session
+            session['user_id'] = user[0]  # Assuming user[0] is user_id
+            session.permanent = True  # Session will follow lifetime defined above
 
             # Successful sign-in
-            print("Candidate signed in successfully")
-            return jsonify({'message': 'Candidate signed in successfully'}), 200
+            print(f"Candidate with email {email} signed in successfully")
+            # Assuming you've stored the user_id in the session after a successful login
+            user_id = session.get('user_id')
+
+            if user_id:
+                print(f"User ID: {user_id}")
+            else:
+                print("User ID not found in session")
+
+            return jsonify({'message': 'Candidate signed in successfully', 'user_id': user[0]}), 200
 
         except Exception as db_error:
             # Log the database error
             print(f"Database error: {db_error}")
             mysql.connection.rollback()
-            return jsonify({'error': str(db_error)}), 500
+            return jsonify({'error': 'Database error occurred, please try again later'}), 500
 
         finally:
             cursor.close()
-            print("Cursor closed")
+            print("Database cursor closed")
 
     except Exception as e:
         # Log any other errors
         print(f"Error occurred: {e}")
-        return jsonify({'error': str(e)}), 500
-
+        return jsonify({'error': 'An unexpected error occurred, please try again later'}), 500
 
 @app.route('/hr-signin', methods=['POST'])
 def hr_signin():

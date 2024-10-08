@@ -27,19 +27,13 @@ function JobPosting() {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    // Add a dummy user ID for testing purposes
-    const dataToSend = {
-      ...formData,
-      user_id: 1  // You can set a fixed user_id here for testing
-    };
-
     try {
       const response = await fetch('http://localhost:5000/job-posting', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(dataToSend),
+        body: JSON.stringify(formData),
       });
 
       if (!response.ok) {
