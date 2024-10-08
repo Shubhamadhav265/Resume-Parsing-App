@@ -56,6 +56,18 @@ const App = () => {
               </Link>{" "}
               {/* Link to HR Signin */}
             </li>
+            <li style={styles.navItem}>
+              <Link to="/jobs" style={styles.navLink}>
+                HR Dashboard
+              </Link>{" "}
+              {/* Link to HR Signin */}
+            </li>
+            <li style={styles.navItem}>
+              <Link to="/applied-jobs" style={styles.navLink}>
+                Candidate Dashboard
+              </Link>{" "}
+              {/* Link to Candidate Signin */}
+            </li>
           </ul>
         </nav>
         <div style={styles.container}>
@@ -71,8 +83,8 @@ const App = () => {
             {/* Route for Candidate signUp */}
             <Route path="/hr-signin" element={<HRSignIn />} />{" "}
             {/* Route for HR signIn */}
-            <Route path="/hr-dashboard" element={<HrDashboard />} />
-            <Route path="/cand-dashboard" element={<CandDashboard />} />
+            <Route path="/jobs" element={<HrDashboard />} />
+            <Route path="/applied-jobs" element={<CandDashboard />} />
           </Routes>
         </div>
       </div>

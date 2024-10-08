@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from 'react-router-dom';
 import axios from "axios";
 
 const HRSignin = () => {
@@ -9,6 +10,7 @@ const [formData, setFormData] = useState({
 
 const [error, setError] = useState("");
 const [success, setSuccess] = useState("");
+const navigate = useNavigate();
 
 const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -35,6 +37,7 @@ const handleSubmit = async (e) => {
 
     // Optionally, handle successful sign-in (e.g., redirect, store token, etc.)
     console.log("Sign-in successful:", response.data);
+    navigate('/jobs'); // Redirect to HR Dashboard on successful sign-in
     } catch (error) {
     setError(
         error.response ? error.response.data.error : "An error occurred"
