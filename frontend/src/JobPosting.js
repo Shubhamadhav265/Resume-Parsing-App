@@ -26,12 +26,16 @@ function JobPosting() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    
+    // Get the JWT token from local storage
+    const token = localStorage.getItem('access_token');
 
     try {
       const response = await fetch('http://localhost:5000/job-posting', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`, // Add the token here
         },
         body: JSON.stringify(formData),
       });

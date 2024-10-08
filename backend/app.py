@@ -243,7 +243,8 @@ def candidate_signin():
                 print(f"User ID: {user_id}")
             else:
                 print("User ID not found in session")
-
+            
+            
             return jsonify({'message': 'Candidate signed in successfully', 'user_id': user[0]}), 200
 
         except Exception as db_error:
@@ -261,22 +262,19 @@ def candidate_signin():
         print(f"Error occurred: {e}")
         return jsonify({'error': 'An unexpected error occurred, please try again later'}), 500
 
+
 @app.route('/hr-signin', methods=['POST'])
 def hr_signin():
     try:
-        # Log the request data
         print("Received HR sign-in request")
-
         data = request.get_json()
         print(f"Request data: {data}")
 
         email = data.get('email')
         password = data.get('password')
 
-        # Log extracted data
         print(f"Extracted email: {email}, password: [HIDDEN]")
 
-        # Check for missing fields
         if not all([email, password]):
             print("Missing fields in the request")
             return jsonify({'error': 'All fields are required'}), 400
@@ -284,41 +282,36 @@ def hr_signin():
         cursor = mysql.connection.cursor()
 
         try:
-            # Log the database query
             print(f"Querying user with email: {email}")
             cursor.execute("SELECT * FROM Users WHERE email = %s", (email,))
             user = cursor.fetchone()
 
-            # Check if user exists
             if not user:
                 print("User does not exist")
                 return jsonify({'error': 'User does not exist'}), 404
 
             print(f"User found: {user}")
 
-            # Check if the user is an HR
             if user[3] != 'HR':  # Assuming user[3] is the role
                 print("User is not an HR")
                 return jsonify({'error': 'User is not authorized as HR'}), 403
 
-            # Log the hashed password
             hashed_password = user[2]  # Assuming user[2] is the hashed password
             print(f"Hashed password from DB: {hashed_password}")
 
-            # Check password
             if not bcrypt.check_password_hash(hashed_password, password):
                 print("Incorrect password")
                 return jsonify({'error': 'Incorrect password'}), 400
 
-            # Here we'r generating access_token for the signedin user_id
-            print(create_access_token(identity=user[0]))
+            # Generate access_token for the signed-in user_id
+            access_token = create_access_token(identity=user[0], expires_delta=timedelta(minutes=3))  # 3 minutes expiration
+            print(f"Generated access token: {access_token}")
 
             # Successful sign-in
             print("HR signed in successfully")
-            return jsonify({'message': 'HR signed in successfully'}), 200
+            return jsonify({'access_token': access_token, 'message': 'HR signed in successfully'}), 200
 
         except Exception as db_error:
-            # Log the database error
             print(f"Database error: {db_error}")
             mysql.connection.rollback()
             return jsonify({'error': str(db_error)}), 500
@@ -328,12 +321,12 @@ def hr_signin():
             print("Cursor closed")  
 
     except Exception as e:
-        # Log any other errors
         print(f"Error occurred: {e}")
         return jsonify({'error': str(e)}), 500
 
 
 @app.route('/upload', methods=['POST'])
+@jwt_required() # This is the game of Authentication
 def upload_resume():
     if 'file' not in request.files:
         return jsonify({'error': 'No file part'}), 400
@@ -553,6 +546,7 @@ def get_gemini_response(prompt):
         return None
 
 @app.route('/job-posting', methods=['POST'])
+@jwt_required() # This is the game of Authentication
 def create_job_posting():
     data = request.get_json()
     

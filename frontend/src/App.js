@@ -9,6 +9,7 @@ import HRSignIn from "./components/HRSignIn"; // Importing the existing HR signi
 import LandingPage from "./components/LandingPage"; //Importing the existing Landinag Page
 import CandDashboard from "./components/CandDashBoard";
 import HrDashboard from "./components/HrDashBoard";
+import ProtectedRoute from "./ProtectedRoute";
 
 const App = () => {
   return (
@@ -74,7 +75,7 @@ const App = () => {
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/upload" element={<UploadResume />} />
-            <Route path="/job-posting" element={<JobPosting />} />
+            {/* <Route path="/job-posting" element={<JobPosting />} /> */}
             <Route path="/candidate-signup" element={<CandSignup />} />{" "}
             {/* Route for candidate signup */}
             <Route path="/hr-signup" element={<HRSignup />} />{" "}
@@ -83,7 +84,18 @@ const App = () => {
             {/* Route for Candidate signUp */}
             <Route path="/hr-signin" element={<HRSignIn />} />{" "}
             {/* Route for HR signIn */}
-            <Route path="/jobs" element={<HrDashboard />} />
+            <Route path="/hr-signin" element={<HRSignIn />} />
+            {/* Protect HR Dashboard */}
+            <Route path="/jobs" element={
+                <ProtectedRoute>
+                    <HrDashboard />
+                </ProtectedRoute>
+            } />
+            <Route path="job-posting" element={
+              <ProtectedRoute>
+                <JobPosting/>
+              </ProtectedRoute>
+            }/>
             <Route path="/applied-jobs" element={<CandDashboard />} />
           </Routes>
         </div>
