@@ -723,30 +723,34 @@ def get_applied_jobs():
     Endpoint to get all applied jobs for a user
     """
     try:
-        # Step 1: Get the user ID from the request
-        user_id = request.args.get('user_id')
-        logging(f"User ID: {user_id}")
+        # Step 1: Get the user_id from the session
+        user_id = session.get('user_id')  # Assuming user_id is stored in the session
+        logging.info("User ID", {user_id})
         if not user_id:
-            return jsonify({'error': 'User ID is required'}), 400
+            return jsonify({'error': 'User not authenticated'}), 401
 
         # Step 2: Connect to the database
         cursor = mysql.connection.cursor()
         logging.info("Database connection established successfully.")
         
         # Step 3: Execute the database query
-        query = """SELECT jp.job_id, jp.user_id, jp.company_name, jp.title, jp.description, jp.primary_skills, jp.secondary_skills, jp.other_skills, jp.package, jp.stipend_amount, a.applied_at, a.status
-                    FROM Job_Postings jp
-                    INNER JOIN Applications a ON jp.job_id = a.job_id
-                    WHERE a.user_id = %s
-                    ORDER BY a.applied_at DESC"""
+        query = """
+            SELECT jp.job_id, jp.user_id, jp.company_name, jp.title, jp.description, 
+                   jp.primary_skills, jp.secondary_skills, jp.other_skills, 
+                   jp.package, jp.stipend_amount, a.applied_at, a.status
+            FROM Job_Postings jp
+            INNER JOIN Applications a ON jp.job_id = a.job_id
+            WHERE a.user_id = %s
+            ORDER BY a.applied_at DESC
+        """
         try:
             cursor.execute(query, (user_id,))
             applied_jobs = cursor.fetchall()
-            logging.info("Applied jobs fetched from the database: %s", applied_jobs)
-            
+            logging.info("Applied jobs fetched from the database.")
+
             # Step 4: Return the applied jobs
             if applied_jobs:
-                return jsonify([applied_job_to_dict(applied_job) for applied_job in applied_jobs])
+                return jsonify([applied_job_to_dict(applied_job) for applied_job in applied_jobs]), 200
             else:
                 return jsonify({'message': 'No applied jobs found'}), 404
         except Exception as e:
@@ -754,11 +758,12 @@ def get_applied_jobs():
             mysql.connection.rollback()
             logging.error("Database query error: %s", e)
             return jsonify({'error': f"Database error: {str(e)}"}), 500
+        finally:
+            cursor.close()  # Ensure cursor is closed after the operation
     except Exception as e:
         # Step 6: Catch any unexpected errors
         logging.error("An unexpected error occurred: %s", e)
         return jsonify({'error': f"An unexpected error occurred: {str(e)}"}), 500
-
 
 def applied_job_to_dict(applied_job):
     logging.info("Converting applied job to dict: %s", applied_job)
@@ -777,8 +782,6 @@ def applied_job_to_dict(applied_job):
         'status': applied_job[11]
     }
 
-from flask import jsonify, session
-import logging
 
 @app.route('/posted-jobs', methods=['GET'])
 def get_posted_jobs():

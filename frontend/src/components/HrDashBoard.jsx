@@ -34,7 +34,7 @@ const HRDashboard = () => {
   const handleLogout = async () => {
     try {
       await axios.post("http://localhost:5000/logout", {}, { withCredentials: true });
-      navigate("/hr-signin"); // Redirect to login after logout
+      navigate("/"); // Redirect to login after logout
     } catch (error) {
       console.error("Error logging out:", error);
     }

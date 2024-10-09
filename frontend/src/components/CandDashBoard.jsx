@@ -1,34 +1,32 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import UploadResume from "./UploadResume"; // Import the UploadResume component
+import UploadResume from "./UploadResume";
 
 const CandDashBoard = () => {
     const [appliedJobs, setAppliedJobs] = useState([]);
     const [availableJobs, setAvailableJobs] = useState([]);
-    const [isUploading, setIsUploading] = useState(false); // State to control visibility of UploadResume
-    const [selectedJobId, setSelectedJobId] = useState(null); // State to store selected job_id
+    const [isUploading, setIsUploading] = useState(false);
+    const [selectedJobId, setSelectedJobId] = useState(null);
 
     useEffect(() => {
-        // Fetch applied jobs from the backend
         const fetchAppliedJobs = async () => {
             try {
                 const response = await axios.get("http://localhost:5000/applied-jobs", {
-                    withCredentials: true,  // Ensure session cookie is sent with the request
+                    withCredentials: true,
                 });
-                setAppliedJobs(response.data); // Assuming the response contains an array of applied jobs
+                setAppliedJobs(response.data);
             } catch (error) {
                 console.error("Error fetching applied jobs:", error);
             }
         };
 
-        // Fetch available jobs from the backend
         const fetchAvailableJobs = async () => {
             try {
                 const response = await axios.get("http://localhost:5000/available-jobs", {
-                    withCredentials: true,  // Ensure session cookie is sent with the request
+                    withCredentials: true,
                 });
-                setAvailableJobs(response.data); // Assuming the response contains an array of available jobs
+                setAvailableJobs(response.data);
             } catch (error) {
                 console.error("Error fetching available jobs:", error);
             }
@@ -40,24 +38,29 @@ const CandDashBoard = () => {
 
     const handleApply = (jobId) => {
         console.log(`Applying for job ID: ${jobId}`);
-        setSelectedJobId(jobId); // Store selected job_id
-        setIsUploading(true); // Show the upload resume component
+        setSelectedJobId(jobId);
+        setIsUploading(true);
     };
 
     const closeUploadResume = () => {
-        setIsUploading(false); // Hide the upload resume component
-        setSelectedJobId(null); // Clear selected job_id
+        setIsUploading(false);
+        setSelectedJobId(null);
     };
 
     const navigate = useNavigate();
-    // Handler for logout
+
     const handleLogout = async () => {
         try {
             await axios.post("http://localhost:5000/logout", {}, { withCredentials: true });
-            navigate("/candidate-signin"); // Redirect to login after logout
+            navigate("/");
         } catch (error) {
             console.error("Error logging out:", error);
         }
+    };
+
+    // New function to remove job from available jobs
+    const removeJobFromAvailable = (jobId) => {
+        setAvailableJobs((prevJobs) => prevJobs.filter((job) => job.job_id !== jobId));
     };
 
     return (
@@ -73,7 +76,7 @@ const CandDashBoard = () => {
                         <div key={job.id} style={styles.jobCard}>
                             <h4 style={styles.jobTitle}>{job.title}</h4>
                             <p style={styles.jobCompany}>{job.company_name}</p>
-                            <p style={styles.jobStatus}>{job.status}</p> {/* Example of status */}
+                            <p style={styles.jobStatus}>{job.status}</p>
                         </div>
                     ))
                 ) : (
@@ -105,11 +108,17 @@ const CandDashBoard = () => {
                 )}
             </div>
 
-            {/* Conditional rendering of UploadResume component */}
-            {isUploading && <UploadResume onClose={closeUploadResume} jobId={selectedJobId} />}  {/* Pass jobId as a prop */}
+            {isUploading && (
+                <UploadResume
+                    onClose={closeUploadResume}
+                    jobId={selectedJobId}
+                    onJobUploaded={removeJobFromAvailable} // Pass the callback
+                />
+            )}
         </div>
     );
 };
+
 
 // Define styles here...
 

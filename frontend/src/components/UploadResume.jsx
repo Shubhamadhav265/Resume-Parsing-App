@@ -2,11 +2,11 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
-const UploadResume = ({ onClose, jobId }) => {
+const UploadResume = ({ onClose, jobId, onJobUploaded }) => {
     const [file, setFile] = useState(null);
     const [error, setError] = useState("");
 
-    const navigate = useNavigate(); // Use the useNavigate hook
+    const navigate = useNavigate();
 
     const handleFileChange = (e) => {
         setFile(e.target.files[0]);
@@ -18,23 +18,22 @@ const UploadResume = ({ onClose, jobId }) => {
             return;
         }
 
-        // Create FormData to send file and job_id
         const formData = new FormData();
         formData.append("file", file);
-        formData.append("job_id", jobId); // Add job_id to the form data
+        formData.append("job_id", jobId);
 
         try {
             const response = await axios.post("http://localhost:5000/upload", formData, {
-                withCredentials: true,  // Ensure session cookie is sent with the request
+                withCredentials: true,
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },
             });
 
-            // Handle successful upload
             console.log("Resume uploaded successfully:", response.data);
-            navigate("/cand-dashboard"); 
-            onClose(); // Close the upload modal
+            onJobUploaded(jobId); // Call the callback with jobId
+            navigate("/cand-dashboard", { replace: true });
+            onClose();
         } catch (error) {
             console.error("Error uploading resume:", error);
             setError("Failed to upload resume.");
