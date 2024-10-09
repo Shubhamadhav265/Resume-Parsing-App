@@ -29,7 +29,7 @@ CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
   # Enabling CORS for all routes
 bcrypt = Bcrypt(app)
-session(app)
+# session(app)
 app.config.update(
     SESSION_COOKIE_HTTPONLY=True,   # Prevent JavaScript from accessing session cookie
     SESSION_COOKIE_SECURE=False,    # Set to True in production with HTTPS
@@ -42,7 +42,7 @@ app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = os.getenv('MYSQL_USER')  # Adding our MySQL username in the .env file
 app.config['MYSQL_PASSWORD'] = os.getenv('MYSQL_PASSWORD')  # Adding our MySQL password in the .env file
 app.config['MYSQL_DB'] = os.getenv('MYSQL_DB')  # Adding our database name in the .env file
-
+app.config['SESSION_TYPE'] = 'filesystem' 
 mysql = MySQL(app)
 
 app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
@@ -342,19 +342,14 @@ def candidate_signin():
 @app.route('/hr-signin', methods=['POST'])
 def hr_signin():
     try:
-        # Log the request data
         print("Received HR sign-in request")
-
         data = request.get_json()
         print(f"Request data: {data}")
 
         email = data.get('email')
         password = data.get('password')
-
-        # Log extracted data
         print(f"Extracted email: {email}, password: [HIDDEN]")
 
-        # Check for missing fields
         if not all([email, password]):
             print("Missing fields in the request")
             return jsonify({'error': 'All fields are required'}), 400
@@ -362,53 +357,54 @@ def hr_signin():
         cursor = mysql.connection.cursor()
 
         try:
-            # Log the database query
             print(f"Querying user with email: {email}")
             cursor.execute("SELECT * FROM Users WHERE email = %s", (email,))
             user = cursor.fetchone()
 
-            # Check if user exists
             if not user:
                 print("User does not exist")
                 return jsonify({'error': 'User does not exist'}), 404
 
             print(f"User found: {user}")
 
-            # Check if the user is an HR
             if user[3] != 'HR':  # Assuming user[3] is the role
                 print("User is not an HR")
                 return jsonify({'error': 'User is not authorized as HR'}), 403
 
-            # Log the hashed password
             hashed_password = user[2]  # Assuming user[2] is the hashed password
             print(f"Hashed password from DB: {hashed_password}")
 
-            # Check password
             if not bcrypt.check_password_hash(hashed_password, password):
                 print("Incorrect password")
                 return jsonify({'error': 'Incorrect password'}), 400
 
-            # Here we'r generating access_token for the signedin user_id
-            print(create_access_token(identity=user[0]))
+            # Store user_id and role in session
+            session['user_id_hr'] = user[0]  # Assuming user[0] is user_id
+            session['role'] = user[3]     # Assuming user[3] is the role (HR in this case)
+            session.permanent = True      # Session will follow lifetime defined above
+            session.modified = True
+
+            # Print session data to check if it's stored correctly
+            print(f"Session after login of hr: {session}")
+            print(f"User ID: {session.get('user_id_hr')}, Role: {session.get('role')}")
 
             # Successful sign-in
             print("HR signed in successfully")
-            return jsonify({'message': 'HR signed in successfully'}), 200
+            return jsonify({'message': 'HR signed in successfully', 'user_id_hr': user[0], 'role': user[3]}), 200
 
         except Exception as db_error:
-            # Log the database error
             print(f"Database error: {db_error}")
             mysql.connection.rollback()
-            return jsonify({'error': str(db_error)}), 500
+            return jsonify({'error': 'Database error occurred, please try again later'}), 500
 
         finally:
             cursor.close()
-            print("Cursor closed")  
+            print("Cursor closed")
 
     except Exception as e:
-        # Log any other errors
         print(f"Error occurred: {e}")
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'An unexpected error occurred, please try again later'}), 500
+
 
 
 @app.route('/upload', methods=['POST'])
@@ -631,6 +627,7 @@ import logging
 # Configure logging to capture error messages and info for debugging
 logging.basicConfig(level=logging.DEBUG)
 
+
 @app.route('/job-posting', methods=['POST'])
 def create_job_posting():
     try:
@@ -642,7 +639,7 @@ def create_job_posting():
         
         logging.info("Received data: %s", data)
 
-        # Step 2: Validate required fields
+        # Step 2: Validate required fields in the request body
         company_name = data.get('company_name')
         job_description = data.get('job_description')
         role = data.get('role')
@@ -651,18 +648,36 @@ def create_job_posting():
         other_skills = data.get('other_skills')
         package = data.get('package')
         stipend_amount = data.get('stipend_amount')
-        user_id = data.get('user_id', 1)  # default to 1 if not provided
 
-        if not all([company_name, job_description, role, primary_skills, user_id]):
-            missing_fields = [field for field in ['company_name', 'job_description', 'role', 'primary_skills', 'user_id'] if not data.get(field)]
+        # Check for missing required fields and log them
+        required_fields = ['company_name', 'job_description', 'role', 'primary_skills']
+        missing_fields = [field for field in required_fields if not data.get(field)]
+        if missing_fields:
             logging.error("Missing required fields: %s", missing_fields)
             return jsonify({'error': f'Missing required fields: {missing_fields}'}), 400
 
-        # Step 3: Connect to the database
+        # Step 3: Validate numeric fields (package and stipend_amount) are of correct type
+        try:
+            # Ensure that package and stipend_amount are either None or valid floats
+            package = float(package) if package else None
+            stipend_amount = float(stipend_amount) if stipend_amount else None
+        except ValueError as e:
+            logging.error(f"Invalid data type for numeric fields: package - {package}, stipend_amount - {stipend_amount}")
+            return jsonify({'error': 'Package and stipend_amount must be valid numbers'}), 400
+
+        # Step 4: Get the HR's user_id from the session
+        user_id = session.get('user_id_hr')
+        if not user_id:
+            logging.error("User not logged in. HR user ID is missing.")
+            return jsonify({'error': 'HR user must be logged in to create a job posting'}), 401
+        
+        logging.info(f"Using HR user ID: {user_id} from session.")
+
+        # Step 5: Connect to the database
         cursor = mysql.connection.cursor()
         logging.info("Database connection established successfully.")
-        
-        # Step 4: Execute the database insert query
+
+        # Step 6: Execute the database insert query
         try:
             query = '''INSERT INTO Job_Postings (user_id, title, description, primary_skills, secondary_skills, other_skills, company_name, package, stipend_amount) 
                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)'''
@@ -672,19 +687,19 @@ def create_job_posting():
             return jsonify({'message': 'Job posting created successfully'}), 201
         
         except Exception as e:
-            # Step 5: Handle any database-related errors
+            # Step 7: Handle any database-related errors
             mysql.connection.rollback()
-            logging.error("Database insertion error: %s", e)
+            logging.error(f"Database insertion error: {str(e)}")
             return jsonify({'error': f"Database error: {str(e)}"}), 500
         
         finally:
-            # Step 6: Ensure cursor is closed
+            # Step 8: Ensure cursor is closed
             cursor.close()
             logging.info("Database cursor closed.")
 
     except Exception as e:
-        # Step 7: Catch any unexpected errors
-        logging.error("An unexpected error occurred: %s", e)
+        # Step 9: Catch any unexpected errors
+        logging.error(f"An unexpected error occurred: {str(e)}")
         return jsonify({'error': f"An unexpected error occurred: {str(e)}"}), 500
 
 @app.route('/available-jobs', methods=['GET'])
@@ -727,16 +742,20 @@ def fetch_available_jobs():
 
 
 def job_posting_to_dict(job_posting):
-    logging.info("Converting job posting to dict: %s", job_posting)
-    return {
+    job_dict = {
         'job_id': job_posting[0],
         'user_id': job_posting[1],
         'company_name': job_posting[2],
         'title': job_posting[3],
         'description': job_posting[4],
-        'package': float(job_posting[5]),  # Convert Decimal to float if needed
-        'stipend_amount': float(job_posting[6])  # Convert Decimal to float if needed
+        'primary_skills': job_posting[5],
+        'secondary_skills': job_posting[6],
+        'other_skills': job_posting[7],
+        'package': float(job_posting[8]),  # Ensure package is converted to float
+        'stipend_amount': float(job_posting[9])  # Ensure stipend_amount is converted to float
     }
+    return job_dict
+
 
 
 @app.route('/applied-jobs', methods=['GET'])
@@ -799,6 +818,75 @@ def applied_job_to_dict(applied_job):
         'status': applied_job[11]
     }
 
+from flask import jsonify, session
+import logging
+
+@app.route('/posted-jobs', methods=['GET'])
+def get_posted_jobs():
+    """
+    Endpoint to get all jobs posted by the logged-in HR user.
+    """
+    try:
+        # Step 1: Get the user ID from the session
+        user_id_hr = session.get('user_id_hr')
+        if not user_id_hr:
+            logging.warning("No user ID found in session. User not logged in.")
+            return jsonify({'error': 'Please sign in as an HR user'}), 401
+        
+        logging.info(f"User ID: {user_id_hr} fetched from session.")
+
+        # Step 2: Connect to the database
+        cursor = mysql.connection.cursor()
+        logging.info("Database connection established successfully.")
+
+        # Step 3: Execute the database query
+        query = """SELECT job_id, user_id, company_name, title, description, 
+                          primary_skills, secondary_skills, other_skills, package, stipend_amount
+                   FROM Job_Postings
+                   WHERE user_id = %s"""
+        try:
+            cursor.execute(query, (user_id_hr,))
+            posted_jobs = cursor.fetchall()
+            logging.info(f"Fetched {len(posted_jobs)} job postings from the database.")
+
+            # Step 4: Return the posted jobs
+            if posted_jobs:
+                logging.info(f"Jobs found: {posted_jobs}")
+                # Convert each row to dictionary format using the helper function
+                return jsonify([job_posting_to_dict(posted_job) for posted_job in posted_jobs]), 200
+            else:
+                logging.info("No job postings found for the user.")
+                return jsonify({'message': 'No posted jobs found'}), 404
+
+        except Exception as e:
+            # Step 5: Handle database query errors
+            logging.error(f"Database query error: {str(e)}")
+            return jsonify({'error': f"Database query error: {str(e)}"}), 500
+
+    except Exception as e:
+        # Step 6: Catch any unexpected errors
+        logging.error(f"Unexpected error occurred: {str(e)}")
+        return jsonify({'error': f"Unexpected error: {str(e)}"}), 500
+
+    finally:
+        # Ensure cursor is closed
+        try:
+            cursor.close()
+            logging.info("Database cursor closed.")
+        except Exception as e:
+            logging.error(f"Error closing cursor: {str(e)}")
+
+@app.route('/logout', methods=['POST'])
+def logout():
+    try:
+        # Clear the session to log the user out
+        session.clear()
+        
+        # Optionally, send a success message as a response
+        return jsonify({'message': 'User logged out successfully'}), 200
+    except Exception as e:
+        # Handle any errors that occur during logout
+        return jsonify({'error': f"Logout failed: {str(e)}"}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)

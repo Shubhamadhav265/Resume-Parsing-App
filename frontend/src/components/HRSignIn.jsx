@@ -30,7 +30,8 @@ const HRSignin = () => {
     try {
       const response = await axios.post(
         "http://localhost:5000/hr-signin", // Update the endpoint as needed
-        formData
+        formData,
+        { withCredentials: true } // Ensure cookies are sent and received
       );
       setSuccess(response.data.message);
       setError("");
