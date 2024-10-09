@@ -712,8 +712,9 @@ def fetch_available_jobs():
         
         # Step 2: Execute the database select query
         try:
-            query = '''SELECT job_id, user_id, company_name, title, description,package, stipend_amount
-                       FROM Job_Postings'''
+            query = '''SELECT job_id, user_id, company_name, title, description, primary_skills, secondary_skills, other_skills, package, stipend_amount
+           FROM Job_Postings'''
+
             cursor.execute(query)
             job_postings = cursor.fetchall()
             logging.info("Available job postings fetched from the database: %s", job_postings)
@@ -881,7 +882,7 @@ def logout():
     try:
         # Clear the session to log the user out
         session.clear()
-        
+
         # Optionally, send a success message as a response
         return jsonify({'message': 'User logged out successfully'}), 200
     except Exception as e:
