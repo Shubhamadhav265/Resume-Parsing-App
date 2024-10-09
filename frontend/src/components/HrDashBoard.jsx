@@ -4,16 +4,21 @@ import axios from "axios";
 
 const HRDashboard = () => {
   const [jobs, setJobs] = useState([]);
+  const [loading, setLoading] = useState(true);  // Loading state
   const navigate = useNavigate();
 
   // Fetch posted jobs from job_posting table
   useEffect(() => {
     const fetchJobs = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/jobs"); // Adjust the endpoint for fetching jobs
+        const response = await axios.get("http://localhost:5000/posted-jobs", {
+          withCredentials: true, // Ensure the session cookie is sent with the request
+        });
         setJobs(response.data);
+        setLoading(false); // Set loading to false when data is fetched
       } catch (error) {
         console.error("Error fetching job postings:", error);
+        setLoading(false); // Stop loading even on error
       }
     };
 
@@ -25,6 +30,16 @@ const HRDashboard = () => {
     navigate("/job-posting");
   };
 
+  // Handler for logout
+  const handleLogout = async () => {
+    try {
+      await axios.post("http://localhost:5000/logout", {}, { withCredentials: true });
+      navigate("/"); // Redirect to login after logout
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
+  };
+
   return (
     <div>
       {/* Navbar */}
@@ -32,34 +47,44 @@ const HRDashboard = () => {
         <ul style={styles.navList}>
           <li><Link to="/hr-dashboard">Home</Link></li>
           <li><Link to="/hr-profile">Profile</Link></li>
-          <li><Link to="/logout">Logout</Link></li>
+          <li>
+            <button onClick={handleLogout} style={styles.logoutButton}>
+              Logout
+            </button>
+          </li>
         </ul>
       </nav>
 
       {/* Posted Jobs Section */}
       <div style={styles.container}>
         <h2>Posted Jobs</h2>
-        <div style={styles.jobList}>
-          {jobs.map((job) => (
-            <div key={job.id} style={styles.jobCard}>
-              <h3>{job.role}</h3>
-              <p><strong>Company:</strong> {job.company_name}</p>
-              <p><strong>Location:</strong> {job.location}</p>
-              <p><strong>Salary:</strong> {job.salary_range}</p>
-              <p><strong>Primary Skills:</strong> {job.primary_skills}</p>
-              <p><strong>Secondary Skills:</strong> {job.secondary_skills}</p>
-              <p><strong>Work Mode:</strong> {job.work_mode}</p>
 
-              {/* See Students Rankings Button */}
-              <button
-                onClick={() => navigate(`/student-rankings/${job.id}`)}
-                style={styles.button}
-              >
-                See Students Rankings
-              </button>
-            </div>
-          ))}
-        </div>
+        {/* Show a loading spinner while fetching the data */}
+        {loading ? (
+          <p>Loading...</p>
+        ) : (
+          <div style={styles.jobList}>
+            {jobs.map((job) => (
+              <div key={job.job_id} style={styles.jobCard}> {/* Added key prop */}
+                <h3>{job.role}</h3>
+                <p><strong>Company:</strong> {job.company_name}</p>
+                <p><strong>Location:</strong> {job.location}</p>
+                <p><strong>Salary:</strong> {job.salary_range}</p>
+                <p><strong>Primary Skills:</strong> {job.primary_skills}</p>
+                <p><strong>Secondary Skills:</strong> {job.secondary_skills}</p>
+                <p><strong>Work Mode:</strong> {job.work_mode}</p>
+
+                {/* See Students Rankings Button */}
+                <button
+                  onClick={() => navigate(`/student-rankings/${job.job_id}`)}  
+                  style={styles.button}
+                >
+                  See Students Rankings
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Post a Job Button */}
         <button onClick={handlePostJob} style={styles.postJobButton}>
@@ -81,9 +106,13 @@ const styles = {
     listStyleType: "none",
     padding: 0,
   },
-  navItem: {
+  logoutButton: {
+    padding: "10px 15px",
+    backgroundColor: "#dc3545",
     color: "#fff",
-    textDecoration: "none",
+    border: "none",
+    borderRadius: "4px",
+    cursor: "pointer",
   },
   container: {
     padding: "20px",

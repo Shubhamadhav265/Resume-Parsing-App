@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 
-const HRSignup = () => {
+const HRSignUp = () => {
   const [formData, setFormData] = useState({
     full_name: "",
     email: "",
@@ -14,6 +15,8 @@ const HRSignup = () => {
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  const navigate = useNavigate(); // Initialize useNavigate
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -68,6 +71,11 @@ const HRSignup = () => {
         password: "",
         confirm_password: "",
       });
+
+      // Redirect to HR Sign In after successful signup
+      setTimeout(() => {
+        navigate("/hr-signin"); // Redirect to HR SignIn
+      }, 2000); // Optional delay before redirect
     } catch (error) {
       setError(
         error.response ? error.response.data.error : "An error occurred"
@@ -187,4 +195,4 @@ const styles = {
   },
 };
 
-export default HRSignup;
+export default HRSignUp;

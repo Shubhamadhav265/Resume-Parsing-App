@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 import axios from "axios";
 
 const Signup = () => {
@@ -16,6 +17,8 @@ const Signup = () => {
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  const navigate = useNavigate(); // Initialize useNavigate hook
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -66,6 +69,7 @@ const Signup = () => {
       console.log("Response:", response); // Log the response
       setSuccess(response.data.message);
       setError("");
+      
       // Clear form after successful signup
       setFormData({
         full_name: "",
@@ -78,6 +82,12 @@ const Signup = () => {
         password: "",
         confirm_password: "",
       });
+      
+      // Redirect to candidate login page after successful signup
+      setTimeout(() => {
+        navigate("/candidate-login");
+      }, 2000); // Delay redirection by 2 seconds to show success message
+
     } catch (error) {
       console.error("Error:", error); // Log any errors
       setError(

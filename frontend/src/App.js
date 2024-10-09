@@ -1,15 +1,13 @@
 import React from "react";
 import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom";
-import UploadResume from "./UploadResume";
-import JobPosting from "./JobPosting";
-import CandSignup from "./components/candSignUp"; // Importing the existing candidate signup component
-import HRSignup from "./components/HRSignUp"; // Importing the existing HR signup component
-import CandSignIn from "./components/candSignIn" // Importing the existing candidate signin component
-import HRSignIn from "./components/HRSignIn"; // Importing the existing HR signin component
-import LandingPage from "./components/LandingPage"; //Importing the existing Landinag Page
-import CandDashboard from "./components/CandDashBoard";
+import CandSignup from "./components/candSignUp";
+import HRSignup from "./components/HRSignUp";
+import HRSignin from "./components/HRSignIn";
+import CandSignin from "./components/candSignIn"; // Candidate sign-in component
+import LandingPage from "./components/LandingPage";
 import HrDashboard from "./components/HrDashBoard";
-import ProtectedRoute from "./ProtectedRoute";
+import CandDashboard from "./components/CandDashBoard";
+import JobPosting from "./components/JobPosting";
 
 const App = () => {
   return (
@@ -18,14 +16,9 @@ const App = () => {
         <h1 style={styles.title}>Recruitment Portal</h1>
         <nav style={styles.nav}>
           <ul style={styles.navList}>
-          <li style={styles.navItem}>
+            <li style={styles.navItem}>
               <Link to="/" style={styles.navLink}>
                 Home
-              </Link>
-            </li>
-            <li style={styles.navItem}>
-              <Link to="/upload" style={styles.navLink}>
-                Upload Resume
               </Link>
             </li>
             <li style={styles.navItem}>
@@ -33,70 +26,19 @@ const App = () => {
                 Create Job Posting
               </Link>
             </li>
-            <li style={styles.navItem}>
-              <Link to="/candidate-signup" style={styles.navLink}>
-                Candidate Signup
-              </Link>{" "}
-              {/* Link to candidate signup */}
-            </li>
-            <li style={styles.navItem}>
-              <Link to="/hr-signup" style={styles.navLink}>
-                HR Signup
-              </Link>{" "}
-              {/* Link to HR signup */}
-            </li>
-            <li style={styles.navItem}>
-              <Link to="/candidate-signin" style={styles.navLink}>
-                Candidate Signin
-              </Link>{" "}
-              {/* Link to Candidate Signin */}
-            </li>
-            <li style={styles.navItem}>
-              <Link to="/hr-signin" style={styles.navLink}>
-                HR Signin
-              </Link>{" "}
-              {/* Link to HR Signin */}
-            </li>
-            <li style={styles.navItem}>
-              <Link to="/jobs" style={styles.navLink}>
-                HR Dashboard
-              </Link>{" "}
-              {/* Link to HR Signin */}
-            </li>
-            <li style={styles.navItem}>
-              <Link to="/applied-jobs" style={styles.navLink}>
-                Candidate Dashboard
-              </Link>{" "}
-              {/* Link to Candidate Signin */}
-            </li>
           </ul>
         </nav>
+
         <div style={styles.container}>
           <Routes>
             <Route path="/" element={<LandingPage />} />
-            <Route path="/upload" element={<UploadResume />} />
-            {/* <Route path="/job-posting" element={<JobPosting />} /> */}
-            <Route path="/candidate-signup" element={<CandSignup />} />{" "}
-            {/* Route for candidate signup */}
-            <Route path="/hr-signup" element={<HRSignup />} />{" "}
-            {/* Route for HR signup */}
-            <Route path="/candidate-signin" element={<CandSignIn />} />{" "}
-            {/* Route for Candidate signUp */}
-            <Route path="/hr-signin" element={<HRSignIn />} />{" "}
-            {/* Route for HR signIn */}
-            <Route path="/hr-signin" element={<HRSignIn />} />
-            {/* Protect HR Dashboard */}
-            <Route path="/jobs" element={
-                <ProtectedRoute>
-                    <HrDashboard />
-                </ProtectedRoute>
-            } />
-            <Route path="job-posting" element={
-              <ProtectedRoute>
-                <JobPosting/>
-              </ProtectedRoute>
-            }/>
-            <Route path="/applied-jobs" element={<CandDashboard />} />
+            <Route path="/candidate-signup" element={<CandSignup />} />
+            <Route path="/candidate-signin" element={<CandSignin />} />
+            <Route path="/hr-signup" element={<HRSignup />} />
+            <Route path="/hr-signin" element={<HRSignin />} />
+            <Route path="/hr-dashboard" element={<HrDashboard />} />
+            <Route path="/cand-dashboard" element={<CandDashboard />} />
+            <Route path="/job-posting" element={<JobPosting />} />
           </Routes>
         </div>
       </div>
@@ -104,22 +46,20 @@ const App = () => {
   );
 };
 
-// Inline styles for better organization
 const styles = {
   appContainer: {
-    fontFamily: "Arial, sans-serif",
-    margin: "0 auto",
+    textAlign: "center",
     padding: "20px",
   },
   title: {
-    textAlign: "center",
-    marginBottom: "20px",
+    fontSize: "2.5em",
+    margin: "10px 0",
   },
   nav: {
     marginBottom: "20px",
   },
   navList: {
-    listStyleType: "none",
+    listStyle: "none",
     padding: 0,
     display: "flex",
     justifyContent: "center",
@@ -129,10 +69,11 @@ const styles = {
   },
   navLink: {
     textDecoration: "none",
-    color: "blue",
+    color: "#4CAF50",
+    fontSize: "1.2em",
   },
   container: {
-    marginTop: "20px",
+    padding: "20px",
   },
 };
 
