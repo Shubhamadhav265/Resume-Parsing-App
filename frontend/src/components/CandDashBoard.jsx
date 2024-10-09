@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import UploadResume from "./UploadResume"; // Import the UploadResume component
 
-
 const CandDashBoard = () => {
     const [appliedJobs, setAppliedJobs] = useState([]);
     const [availableJobs, setAvailableJobs] = useState([]);
@@ -16,7 +15,7 @@ const CandDashBoard = () => {
             try {
                 const response = await axios.get("http://localhost:5000/applied-jobs", {
                     withCredentials: true,  // Ensure session cookie is sent with the request
-                }); // Update endpoint as needed
+                });
                 setAppliedJobs(response.data); // Assuming the response contains an array of applied jobs
             } catch (error) {
                 console.error("Error fetching applied jobs:", error);
@@ -28,7 +27,7 @@ const CandDashBoard = () => {
             try {
                 const response = await axios.get("http://localhost:5000/available-jobs", {
                     withCredentials: true,  // Ensure session cookie is sent with the request
-                }); // Updated endpoint
+                });
                 setAvailableJobs(response.data); // Assuming the response contains an array of available jobs
             } catch (error) {
                 console.error("Error fetching available jobs:", error);
@@ -54,27 +53,20 @@ const CandDashBoard = () => {
     // Handler for logout
     const handleLogout = async () => {
         try {
-        await axios.post("http://localhost:5000/logout", {}, { withCredentials: true });
-        navigate("/candidate-signin"); // Redirect to login after logout
+            await axios.post("http://localhost:5000/logout", {}, { withCredentials: true });
+            navigate("/candidate-signin"); // Redirect to login after logout
         } catch (error) {
-        console.error("Error logging out:", error);
+            console.error("Error logging out:", error);
         }
     };
 
     return (
         <div style={styles.container}>
-            <ul>
-                <h2 style={styles.heading}>Candidate Dashboard</h2>
-
-                <h3 style={styles.subHeading}>Applied Jobs</h3>
-
-                <ul>
-                <button onClick={handleLogout} style={styles.logoutButton}>
+            <h2 style={styles.heading}>Candidate Dashboard</h2>
+            <button onClick={handleLogout} style={styles.logoutButton}>
                 Logout
-                </button>
-                </ul>
-            </ul>
-
+            </button>
+            <h3 style={styles.subHeading}>Applied Jobs</h3>
             <div style={styles.jobContainer}>
                 {appliedJobs.length > 0 ? (
                     appliedJobs.map((job) => (
@@ -118,6 +110,8 @@ const CandDashBoard = () => {
         </div>
     );
 };
+
+// Define styles here...
 
 const styles = {
     container: {

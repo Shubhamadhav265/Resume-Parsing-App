@@ -85,7 +85,7 @@ const Signup = () => {
       
       // Redirect to candidate login page after successful signup
       setTimeout(() => {
-        navigate("/candidate-login");
+        navigate("/candidate-signin");
       }, 2000); // Delay redirection by 2 seconds to show success message
 
     } catch (error) {

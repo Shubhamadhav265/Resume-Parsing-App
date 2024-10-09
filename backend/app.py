@@ -650,6 +650,7 @@ def create_job_posting():
         logging.error(f"An unexpected error occurred: {str(e)}")
         return jsonify({'error': f"An unexpected error occurred: {str(e)}"}), 500
 
+
 @app.route('/available-jobs', methods=['GET'])
 def fetch_available_jobs():
     try:
@@ -657,35 +658,44 @@ def fetch_available_jobs():
         # Step 1: Connect to the database
         cursor = mysql.connection.cursor()
         logging.info("Database connection established successfully.")
-        
-        # Step 2: Execute the database select query
-        try:
-            query = '''SELECT job_id, user_id, company_name, title, description, primary_skills, secondary_skills, other_skills, package, stipend_amount
-           FROM Job_Postings'''
 
-            cursor.execute(query)
+        # Step 2: Get the user_id from the session
+        user_id = session.get('user_id')  # Assuming user_id is stored in the session
+        if not user_id:
+            return jsonify({'error': 'User not authenticated'}), 401
+
+        # Step 3: Execute the database select query
+        try:
+            query = '''SELECT jp.job_id, jp.user_id, jp.company_name, jp.title, jp.description,
+                              jp.primary_skills, jp.secondary_skills, jp.other_skills,
+                              jp.package, jp.stipend_amount
+                       FROM Job_Postings jp
+                       LEFT JOIN Applications a ON jp.job_id = a.job_id AND a.user_id = %s
+                       WHERE a.job_id IS NULL'''  # Only fetch jobs not applied for
+
+            cursor.execute(query, (user_id,))
             job_postings = cursor.fetchall()
             logging.info("Available job postings fetched from the database: %s", job_postings)
-            
-            # Step 3: Return the job postings
+
+            # Step 4: Return the job postings
             if job_postings:
                 return jsonify([job_posting_to_dict(job_posting) for job_posting in job_postings])
             else:
                 return jsonify({'message': 'No job postings found'}), 404
-        
+
         except Exception as e:
-            # Step 4: Handle any database-related errors
+            # Step 5: Handle any database-related errors
             mysql.connection.rollback()
             logging.error("Database query error: %s", e)
             return jsonify({'error': f"Database error: {str(e)}"}), 500
-        
+
         finally:
-            # Step 5: Ensure cursor is closed
+            # Step 6: Ensure cursor is closed
             cursor.close()
             logging.info("Database cursor closed.")
-    
+
     except Exception as e:
-        # Step 6: Catch any unexpected errors
+        # Step 7: Catch any unexpected errors
         logging.error("An unexpected error occurred: %s", e)
         return jsonify({'error': f"An unexpected error occurred: {str(e)}"}), 500
 

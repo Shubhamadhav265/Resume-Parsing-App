@@ -1,9 +1,12 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const UploadResume = ({ onClose, jobId }) => {
     const [file, setFile] = useState(null);
     const [error, setError] = useState("");
+
+    const navigate = useNavigate(); // Use the useNavigate hook
 
     const handleFileChange = (e) => {
         setFile(e.target.files[0]);
@@ -30,6 +33,7 @@ const UploadResume = ({ onClose, jobId }) => {
 
             // Handle successful upload
             console.log("Resume uploaded successfully:", response.data);
+            navigate("/cand-dashboard"); 
             onClose(); // Close the upload modal
         } catch (error) {
             console.error("Error uploading resume:", error);
