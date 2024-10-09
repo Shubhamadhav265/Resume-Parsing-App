@@ -838,6 +838,46 @@ def get_posted_jobs():
         except Exception as e:
             logging.error(f"Error closing cursor: {str(e)}")
 
+
+@app.route('/student-rankings/<int:job_id>', methods=['GET'])
+def get_student_rankings(job_id):
+    try:
+        cur = mysql.connection.cursor()
+
+        # SQL query to fetch student ranking data
+        query = """
+            SELECT 
+                ROW_NUMBER() OVER (ORDER BY er.score DESC) AS sr_no,
+                si.full_name,
+                si.college_name,
+                u.email AS email_id,
+                er.score
+            FROM 
+                Applications a
+            JOIN 
+                Evaluation_Results er ON a.application_id = er.application_id
+            JOIN 
+                Student_Info si ON a.user_id = si.user_id
+            JOIN 
+                Users u ON si.user_id = u.user_id
+            WHERE 
+                a.job_id = %s
+            ORDER BY 
+                er.score DESC;
+        """
+
+        # Execute the query
+        cur.execute(query, (job_id,))
+        results = cur.fetchall()
+        logging.info(results)
+        # Return results as JSON response
+        return jsonify(results)
+
+    except Exception as e:
+        print(f"Error: {e}")
+        return jsonify({'error': 'Error fetching student rankings'}), 500
+    
+
 @app.route('/logout', methods=['POST'])
 def logout():
     try:
@@ -849,6 +889,8 @@ def logout():
     except Exception as e:
         # Handle any errors that occur during logout
         return jsonify({'error': f"Logout failed: {str(e)}"}), 500
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)

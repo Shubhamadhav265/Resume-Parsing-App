@@ -8,6 +8,7 @@ import LandingPage from "./components/LandingPage";
 import HrDashboard from "./components/HrDashBoard";
 import CandDashboard from "./components/CandDashBoard";
 import JobPosting from "./components/JobPosting";
+import StudentRankings from "./components/studentRankings";
 
 const App = () => {
   return (
@@ -39,6 +40,7 @@ const App = () => {
             <Route path="/hr-dashboard" element={<HrDashboard />} />
             <Route path="/cand-dashboard" element={<CandDashboard />} />
             <Route path="/job-posting" element={<JobPosting />} />
+            <Route path="/student-rankings/:job_id" element={<StudentRankings />} />
           </Routes>
         </div>
       </div>
