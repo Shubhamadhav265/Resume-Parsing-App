@@ -1,7 +1,5 @@
 import React from "react";
 import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom";
-import UploadResume from "./UploadResume";
-import JobPosting from "./JobPosting";
 import CandSignup from "./components/candSignup";
 import HRSignup from "./components/HRSignUp";
 import HRSignin from "./components/HRSignIn";
@@ -9,6 +7,7 @@ import CandSignin from "./components/candSignIn"; // Candidate sign-in component
 import LandingPage from "./components/LandingPage";
 import HrDashboard from "./components/HrDashBoard";
 import CandDashboard from "./components/CandDashBoard";
+import JobPosting from "./components/JobPosting";
 
 const App = () => {
   return (
@@ -23,11 +22,6 @@ const App = () => {
               </Link>
             </li>
             <li style={styles.navItem}>
-              <Link to="/upload-resume" style={styles.navLink}>
-                Upload Resume
-              </Link>
-            </li>
-            <li style={styles.navItem}>
               <Link to="/job-posting" style={styles.navLink}>
                 Create Job Posting
               </Link>
@@ -38,15 +32,13 @@ const App = () => {
         <div style={styles.container}>
           <Routes>
             <Route path="/" element={<LandingPage />} />
-            <Route path="/upload-resume" element={<UploadResume />} />
-            <Route path="/job-posting" element={<JobPosting />} />
             <Route path="/candidate-signup" element={<CandSignup />} />
-            <Route path="/candidate-login" element={<CandSignin />} />
+            <Route path="/candidate-signin" element={<CandSignin />} />
             <Route path="/hr-signup" element={<HRSignup />} />
             <Route path="/hr-signin" element={<HRSignin />} />
             <Route path="/hr-dashboard" element={<HrDashboard />} />
             <Route path="/cand-dashboard" element={<CandDashboard />} />
-
+            <Route path="/job-posting" element={<JobPosting />} />
           </Routes>
         </div>
       </div>

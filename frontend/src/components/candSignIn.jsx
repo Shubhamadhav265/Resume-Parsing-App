@@ -30,7 +30,8 @@ const Signin = () => {
         try {
             const response = await axios.post(
                 "http://localhost:5000/candidate-signin", // Update the endpoint as needed
-                formData
+                formData,
+                { withCredentials: true } // Ensure cookies are sent and received
             );
             setSuccess(response.data.message);
             setError("");
@@ -39,7 +40,7 @@ const Signin = () => {
             navigate("/cand-dashboard"); // Use navigate to redirect to dashboard
         } catch (error) {
             setError(
-                error.response ? error.response.data.error : "An error occurred"
+                error.response?.data?.error || "An error occurred" // Use optional chaining
             );
             setSuccess("");
         }
