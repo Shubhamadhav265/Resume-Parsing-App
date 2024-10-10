@@ -1,0 +1,209 @@
+/* General Styling */
+body {
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+  }
+  
+  .landing-container {
+    width: 100%;
+    height: 100%;
+    background-color: #5baf26; /* Soft light blue */
+    color: #333333; /* Dark gray text for readability */
+  }
+  
+  /* Navigation Bar */
+  .navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background-color: #06525e; /* Muted teal */
+    color: white;
+  }
+  
+  .navbar .logo {
+    font-size: 1.5em;
+    font-weight: bold;
+  }
+  
+  .navbar .nav-links {
+    list-style: none;
+    display: flex;
+  }
+  
+  .navbar .nav-links li {
+    margin-left: 20px;
+  }
+  
+  .navbar .nav-links li a {
+    color: white;
+    text-decoration: none;
+    font-size: 1.1em;
+  }
+  
+  /* "Why Choose SmartHire" Section */
+  .why-choose {
+    background-color: #0d6874; /* Muted teal */
+    color: white;
+    text-align: center;
+    padding: 50px 20px;
+  }
+  
+  .why-choose h2 {
+    font-size: 2.5em;
+    margin-bottom: 20px;
+  }
+  
+  .why-choose p {
+    font-size: 1.2em;
+    margin-bottom: 30px;
+  }
+  
+  /* Signup Section (Candidate & HR) */
+  .signup-container {
+    display: flex;
+    justify-content: space-around;
+    padding: 40px 20px;
+    background-color: #C4DFE6; /* Soft light blue */
+  }
+  
+  .signup-part {
+    background-color: #0d6874; /* Muted teal */
+    color: white;
+    padding: 30px;
+    border-radius: 10px;
+    width: 40%;
+    text-align: center;
+  }
+  
+  .signup-part h3 {
+    font-size: 2em;
+    margin-bottom: 20px;
+  }
+  
+  .signup-part p {
+    font-size: 1.1em;
+    margin-bottom: 20px;
+  }
+  
+  .signup-part button {
+    background-color: #96bec8; /* Soft light blue */
+    color: #000708; /* Muted teal */
+    padding: 12px 30px;
+    border: none;
+    font-size: 1.1em;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .signup-part button:hover {
+    background-color: #0a3f46; /* Muted teal */
+    color: white;
+  }
+  
+  /* Start Now Section */
+  .start-now {
+    text-align: center;
+    padding: 50px;
+    background-color: #136c77; /* Muted teal */
+    color: white;
+  }
+  
+  .start-now h2 {
+    font-size: 2.5em;
+    margin-bottom: 30px;
+  }
+  
+  .start-now-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+  }
+  
+  .start-now-buttons button {
+    background-color: #96bec8; /* Soft light blue */
+    color: #000708;/* Muted teal */
+    border: none;
+    padding: 12px 30px;
+    font-size: 1.1em;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+  
+  .start-now-buttons button:hover {
+    background-color: #136c77; /* Light beige */
+    color:WHITE; /* Dark gray */
+  }
+  
+  /* Hero Section */
+  .hero-section {
+    display: flex;
+    justify-content: space-between;
+    padding: 50px;
+    background-color: #C4DFE6; /* Soft light blue */
+    height: 60vh;
+  }
+  
+  .hero-content {
+    flex: 1;
+  }
+  
+  .hero-content h1 {
+    font-size: 3em;
+    color: #0e3439; /* Muted teal */
+  }
+  
+  .hero-content p {
+    font-size: 1.2em;
+    margin-top: 20px;
+  }
+  
+  .swiping-section {
+    flex: 2;
+    display: flex;
+    overflow-x: auto;
+    gap: 20px;
+  }
+  
+  .swipe-card {
+    background-color: #156b7cd7; /* Light beige */
+    color: #ffffff; /* Dark gray */
+    padding: 30px;
+    width: 300px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .swipe-card h3 {
+    font-size: 1.5em;
+    color: #000000; /* Muted teal */
+  }
+  
+  .swipe-card p {
+    font-size: 1.1em;
+    margin-bottom: 20px;
+  }
+  
+  .swipe-card h4 {
+    font-size: 1.2em;
+    font-weight: bold;
+  }
+  
+  /* Footer Section */
+  footer {
+    background-color: #0e5c67; /* Muted teal */
+    color: white;
+    display: flex;
+    justify-content: space-around;
+    padding: 40px 20px;
+  }
+  
+  .footer-section h3 {
+    font-size: 1.5em;
+    margin-bottom: 10px;
+  }
+  
+  .footer-section p {
+    font-size: 1.1em;
+  }
+  
