@@ -844,14 +844,15 @@ def get_student_rankings(job_id):
     try:
         cur = mysql.connection.cursor()
 
-        # SQL query to fetch student ranking data
+        # Corrected SQL query to fetch student ranking data
         query = """
             SELECT 
                 ROW_NUMBER() OVER (ORDER BY er.score DESC) AS sr_no,
                 si.full_name,
                 si.college_name,
                 u.email AS email_id,
-                er.score
+                er.score,
+                a.status
             FROM 
                 Applications a
             JOIN 
@@ -869,7 +870,9 @@ def get_student_rankings(job_id):
         # Execute the query
         cur.execute(query, (job_id,))
         results = cur.fetchall()
+
         logging.info(results)
+
         # Return results as JSON response
         return jsonify(results)
 
@@ -877,6 +880,88 @@ def get_student_rankings(job_id):
         print(f"Error: {e}")
         return jsonify({'error': 'Error fetching student rankings'}), 500
     
+
+@app.route('/shortlist-students/<int:job_id>', methods=['POST'])
+def shortlist_students(job_id):
+    data = request.json
+    num_candidates = data.get('numCandidates', 0)  # Default to 0 as integer
+
+    # Convert num_candidates to an integer
+    try:
+        num_candidates = int(num_candidates)  # Convert to int
+    except ValueError:
+        return jsonify({"error": "Invalid number of candidates"}), 400
+
+    if num_candidates <= 0:
+        return jsonify({"error": "Invalid number of candidates"}), 400
+
+    cursor = mysql.connection.cursor()  # Ensure this is set up properly
+    try:
+        # #fetch the job's shortlist status
+        # cursor.execute("SELECT shortlist_status FROM Job_Postings WHERE job_id = %s", (job_id,))
+        # job = cursor.fetchone()
+
+        # if not job:
+        #     return jsonify({"message": "Job not found"}), 404
+        
+        # shortlist_status = job[0]  # Extract shortlist_status
+
+        # Fetch students based on their scores, ordered by score
+        cursor.execute("""
+            SELECT 
+                ROW_NUMBER() OVER (ORDER BY er.score DESC) AS sr_no,
+                si.full_name,
+                si.college_name,
+                u.user_id,  # Use user_id to update the Applications table
+                u.email AS email_id,
+                er.score,
+                a.status
+            FROM 
+                Applications a
+            JOIN 
+                Evaluation_Results er ON a.application_id = er.application_id
+            JOIN 
+                Student_Info si ON a.user_id = si.user_id
+            JOIN 
+                Users u ON si.user_id = u.user_id
+            WHERE 
+                a.job_id = %s
+            ORDER BY 
+                er.score DESC
+            LIMIT %s
+        """, (job_id, num_candidates))
+
+        shortlisted_students = cursor.fetchall()
+        
+        if not shortlisted_students:
+            return jsonify({"message": "No candidates found to shortlist."}), 404
+
+        # Update the status of shortlisted candidates
+        for student in shortlisted_students:
+            cursor.execute("""
+                UPDATE Applications 
+                SET status = 'Shortlisted' 
+                WHERE user_id = %s AND job_id = %s
+            """, (student[3], job_id))  # Ensure correct index for user_id
+
+        # Update the status of remaining candidates to 'Rejected'
+        cursor.execute("""
+            UPDATE Applications 
+            SET status = 'Rejected' 
+            WHERE job_id = %s AND user_id NOT IN %s
+        """, (job_id, tuple(student[3] for student in shortlisted_students)))
+
+        mysql.connection.commit()  # Commit the changes
+
+        return jsonify({"message": "Students shortlisted successfully."}), 200
+
+    except Exception as e:
+        print(f"Error occurred: {str(e)}")  # Log the error
+        return jsonify({"error": str(e)}), 500
+
+    finally:
+        cursor.close()  # Ensure the cursor is closed
+   
 
 @app.route('/logout', methods=['POST'])
 def logout():
