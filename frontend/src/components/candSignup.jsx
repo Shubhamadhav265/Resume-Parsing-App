@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import './candSignUp.css'; // Correctly link the CSS file
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -10,7 +11,7 @@ const Signup = () => {
     degree: "",
     cgpa: "",
     graduation_year: "",
-    college_name: "", // Added College Name
+    college_name: "",
     password: "",
     confirm_password: "",
   });
@@ -18,7 +19,7 @@ const Signup = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  const navigate = useNavigate(); // Initialize useNavigate hook
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -34,7 +35,7 @@ const Signup = () => {
       degree,
       cgpa,
       graduation_year,
-      college_name, // Added College Name
+      college_name,
       password,
       confirm_password,
     } = formData;
@@ -47,17 +48,15 @@ const Signup = () => {
       !degree ||
       !cgpa ||
       !graduation_year ||
-      !college_name || // Included College Name
+      !college_name ||
       !password ||
       !confirm_password
     ) {
       setError("All fields are required.");
-      console.log("Form Data:", formData); // Log form data
       return;
     }
     if (password !== confirm_password) {
       setError("Passwords do not match.");
-      console.log("Form Data:", formData); // Log form data
       return;
     }
 
@@ -66,11 +65,8 @@ const Signup = () => {
         "http://localhost:5000/candidate-signup",
         formData
       );
-      console.log("Response:", response); // Log the response
       setSuccess(response.data.message);
       setError("");
-      
-      // Clear form after successful signup
       setFormData({
         full_name: "",
         email: "",
@@ -78,38 +74,32 @@ const Signup = () => {
         degree: "",
         cgpa: "",
         graduation_year: "",
-        college_name: "", // Clear College Name
+        college_name: "",
         password: "",
         confirm_password: "",
       });
       
-      // Redirect to candidate login page after successful signup
       setTimeout(() => {
         navigate("/candidate-login");
-      }, 2000); // Delay redirection by 2 seconds to show success message
-
+      }, 2000);
     } catch (error) {
-      console.error("Error:", error); // Log any errors
-      setError(
-        error.response ? error.response.data.error : "An error occurred"
-      );
+      setError(error.response ? error.response.data.error : "An error occurred");
       setSuccess("");
     }
   };
 
   return (
-    <div style={styles.container}>
-      <h2 style={styles.heading}>Candidate Signup</h2>
-      {error && <p style={styles.error}>{error}</p>}
-      {success && <p style={styles.success}>{success}</p>}
-      <form onSubmit={handleSubmit} style={styles.form}>
+    <div className="signup-container">
+      <h2>Candidate Signup</h2>
+      {error && <p className="signup-error">{error}</p>}
+      {success && <p className="signup-success">{success}</p>}
+      <form onSubmit={handleSubmit} className="signup-form">
         <input
           type="text"
           name="full_name"
           placeholder="Full Name"
           value={formData.full_name}
           onChange={handleChange}
-          style={styles.input}
         />
         <input
           type="email"
@@ -117,7 +107,6 @@ const Signup = () => {
           placeholder="Email"
           value={formData.email}
           onChange={handleChange}
-          style={styles.input}
         />
         <input
           type="text"
@@ -125,7 +114,6 @@ const Signup = () => {
           placeholder="Contact Number"
           value={formData.contact_number}
           onChange={handleChange}
-          style={styles.input}
         />
         <input
           type="text"
@@ -133,7 +121,6 @@ const Signup = () => {
           placeholder="Degree"
           value={formData.degree}
           onChange={handleChange}
-          style={styles.input}
         />
         <input
           type="number"
@@ -141,7 +128,6 @@ const Signup = () => {
           placeholder="CGPA"
           value={formData.cgpa}
           onChange={handleChange}
-          style={styles.input}
         />
         <input
           type="number"
@@ -149,15 +135,13 @@ const Signup = () => {
           placeholder="Graduation Year"
           value={formData.graduation_year}
           onChange={handleChange}
-          style={styles.input}
         />
         <input
           type="text"
-          name="college_name" // New field for College Name
+          name="college_name"
           placeholder="College Name"
-          value={formData.college_name} // New field for College Name
+          value={formData.college_name}
           onChange={handleChange}
-          style={styles.input}
         />
         <input
           type="password"
@@ -165,7 +149,6 @@ const Signup = () => {
           placeholder="Password"
           value={formData.password}
           onChange={handleChange}
-          style={styles.input}
         />
         <input
           type="password"
@@ -173,55 +156,11 @@ const Signup = () => {
           placeholder="Confirm Password"
           value={formData.confirm_password}
           onChange={handleChange}
-          style={styles.input}
         />
-        <button type="submit" style={styles.button}>
-          Signup
-        </button>
+        <button type="submit">Signup</button>
       </form>
     </div>
   );
-};
-
-const styles = {
-  container: {
-    maxWidth: "400px",
-    margin: "0 auto",
-    padding: "20px",
-    borderRadius: "8px",
-    boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
-    backgroundColor: "#f9f9f9",
-  },
-  heading: {
-    textAlign: "center",
-    marginBottom: "20px",
-  },
-  form: {
-    display: "flex",
-    flexDirection: "column",
-  },
-  input: {
-    padding: "10px",
-    marginBottom: "10px",
-    borderRadius: "4px",
-    border: "1px solid #ccc",
-  },
-  button: {
-    padding: "10px",
-    backgroundColor: "#28a745",
-    color: "#fff",
-    border: "none",
-    borderRadius: "4px",
-    cursor: "pointer",
-  },
-  error: {
-    color: "red",
-    textAlign: "center",
-  },
-  success: {
-    color: "green",
-    textAlign: "center",
-  },
 };
 
 export default Signup;

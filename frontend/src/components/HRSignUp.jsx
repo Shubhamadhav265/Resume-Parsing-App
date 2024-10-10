@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom"; // Import useNavigate
 
-const HRSignup = () => {
+const HRSignUp = () => {
   const [formData, setFormData] = useState({
     full_name: "",
     email: "",
@@ -195,4 +195,4 @@ const styles = {
   },
 };
 
-export default HRSignup;
+export default HRSignUp;

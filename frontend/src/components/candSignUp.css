@@ -1,0 +1,86 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f4f4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  
+  .signup-container {
+    width: 400px; /* Fixed width for the form */
+    padding: 30px;
+    background-color: #06525e; /* Updated background color */
+    border-radius: 22px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2); /* Soft shadow */
+    color: #ffffff; /* White text for contrast */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .signup-container h2 {
+    font-size: 26px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #ffffff; /* White heading */
+    text-align: center; /* Center-align heading */
+  }
+  
+  .signup-form {
+    display: flex;
+    flex-direction: column;
+    width: 100%; /* Make the form take the full width of the container */
+  }
+  
+  .signup-form input {
+    padding: 12px;
+    margin-bottom: 18px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 16px;
+    background-color: #ffffff; /* White background for inputs */
+    color: #333; /* Dark text color for inputs */
+    transition: border-color 0.3s ease;
+  }
+  
+  .signup-form input:focus {
+    border-color: #2ecc71; /* Green border on focus */
+    outline: none; /* Remove default outline */
+  }
+  
+  .signup-form button {
+    padding: 14px;
+    background-color: #2ecc71; /* Green button */
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    text-transform: uppercase;
+    transition: background-color 0.3s ease;
+  }
+  
+  .signup-form button:hover {
+    background-color: #27ae60; /* Darker green on hover */
+  }
+  
+  .signup-error {
+    color: #e74c3c; /* Red color for error messages */
+    margin-bottom: 15px;
+    text-align: center;
+  }
+  
+  .signup-success {
+    color: #2ecc71; /* Green color for success messages */
+    margin-bottom: 15px;
+    text-align: center;
+  }
+  

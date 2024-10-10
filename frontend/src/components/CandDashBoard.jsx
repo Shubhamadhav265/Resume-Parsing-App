@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import UploadResume from "./UploadResume"; // Import the UploadResume component
+
 
 const CandDashBoard = () => {
     const [appliedJobs, setAppliedJobs] = useState([]);
@@ -48,11 +50,31 @@ const CandDashBoard = () => {
         setSelectedJobId(null); // Clear selected job_id
     };
 
+    const navigate = useNavigate();
+    // Handler for logout
+    const handleLogout = async () => {
+        try {
+        await axios.post("http://localhost:5000/logout", {}, { withCredentials: true });
+        navigate("/candidate-signin"); // Redirect to login after logout
+        } catch (error) {
+        console.error("Error logging out:", error);
+        }
+    };
+
     return (
         <div style={styles.container}>
-            <h2 style={styles.heading}>Candidate Dashboard</h2>
+            <ul>
+                <h2 style={styles.heading}>Candidate Dashboard</h2>
 
-            <h3 style={styles.subHeading}>Applied Jobs</h3>
+                <h3 style={styles.subHeading}>Applied Jobs</h3>
+
+                <ul>
+                <button onClick={handleLogout} style={styles.logoutButton}>
+                Logout
+                </button>
+                </ul>
+            </ul>
+
             <div style={styles.jobContainer}>
                 {appliedJobs.length > 0 ? (
                     appliedJobs.map((job) => (
@@ -152,6 +174,14 @@ const styles = {
         margin: "5px 0",
         color: "#17a2b8",
     },
+    logoutButton: {
+        padding: "10px 15px",
+        backgroundColor: "#dc3545",
+        color: "#fff",
+        border: "none",
+        borderRadius: "4px",
+        cursor: "pointer",
+      },
     applyButton: {
         padding: "10px",
         backgroundColor: "#007bff",

@@ -1,0 +1,70 @@
+/* General container styles for centering the form */
+.container {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-color: #f9f9f9;
+  }
+  
+  /* Heading styles */
+  .heading {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+  }
+  
+  /* Form container */
+  .form {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* Input field styles */
+  .input {
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+    color: #333;
+  }
+  
+  /* Button styles */
+  .button {
+    padding: 10px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    text-transform: uppercase;
+    transition: background-color 0.3s ease;
+  }
+  
+  /* Button hover state */
+  .button:hover {
+    background-color: #0056b3;
+  }
+  
+  /* Error message styles */
+  .error {
+    color: red;
+    text-align: center;
+    margin-bottom: 10px;
+    font-weight: bold;
+  }
+  
+  /* Success message styles */
+  .success {
+    color: green;
+    text-align: center;
+    margin-bottom: 10px;
+    font-weight: bold;
+  }
+  
