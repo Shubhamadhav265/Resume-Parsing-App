@@ -374,37 +374,6 @@ def upload_resume():
         logging.error(f"Failed to save the file: {e}")
         return jsonify({'error': f"Failed to save the file: {e}"}), 500
 
-    resume_text = extract_text_from_pdf(file_path)
-    if not resume_text:
-        return jsonify({'error': 'Failed to extract text from the PDF'}), 500
-
-    skills_extraction = f"""From the following resume text, extract all skills mentioned under any 
-                            section labeled 'Technical Skills,' 'Skills,' or similar. Return 
-                            only the skills as a comma-separated list, with no additional information or 
-                            formatting. Ensure the output is in a single line and consistent across 
-                            multiple runs. **Resume**: {resume_text}"""
-
-    skills = get_gemini_response(skills_extraction)
-    if skills is None:
-        return jsonify({'error': 'Failed to extract skills'}), 500
-
-    resume_skills = extract_skills(skills)
-    skills_string = ', '.join(resume_skills)
-    logging.debug(f"Extracted Skills: {skills_string}")
-
-    try:
-        cursor = mysql.connection.cursor()
-        cursor.execute('''INSERT INTO Resumes (user_id, file_path, status, skills) 
-                          VALUES (%s, %s, 'Pending', %s)''', (user_id, file_path, skills_string))
-        resume_id = cursor.lastrowid
-        mysql.connection.commit()
-    except Exception as e:
-        mysql.connection.rollback()
-        logging.error(f"Database error: {e}")
-        return jsonify({'error': f"Database error: {e}"}), 500
-    finally:
-        cursor.close()
-
     try:
         cursor = mysql.connection.cursor()
         cursor.execute('SELECT primary_skills, secondary_skills, other_skills FROM Job_Postings WHERE job_id = %s', (job_id,))
@@ -425,10 +394,25 @@ def upload_resume():
     finally:
         cursor.close()
 
+    resume_text = extract_text_from_pdf(file_path)
+    if not resume_text:
+        return jsonify({'error': 'Failed to extract text from the PDF'}), 500
 
-    # Primary_Skills = "Java, Python, SQL, Git, Linux, AWS, Docker, Kubernetes, MySQL Workbench, OpenShift, CyberSecurity"
-    # Secondary_Skills = "Tkinter, Express.js, BootStrap, SMTP, Object-Oriented Programming (OOP), Data Structures and Algorithms, Cloudinary, JavaScript, Slack"
-    # Other_Skills = "React.js, Node.js, Azure, GitHub, JUnit, Selenium, MongoDB, PostgreSQL, TensorFlow"
+    skills_extraction = f"""From the following resume text, extract all skills mentioned under any 
+                            section labeled 'Technical Skills,' 'Skills,' or similar. Return 
+                            only the skills as a comma-separated list, with no additional information or 
+                            formatting. Ensure the output is in a single line and consistent across 
+                            multiple runs. **Resume**: {resume_text}"""
+
+    skills = get_gemini_response(skills_extraction)
+
+    if skills is None:
+        return jsonify({'error': 'Failed to extract skills'}), 500
+
+    resume_skills = extract_skills(skills)
+    skills_string = ', '.join(resume_skills)
+    logging.debug(f"Extracted Skills: {skills_string}")
+
 
     feedback_prompt = f"""
         You are reviewing a candidate's resume, which is provided as follows: {resume_text}. 
@@ -451,18 +435,15 @@ def upload_resume():
     if feedback is None:
         return jsonify({'error': 'Failed to extract skills'}), 500
 
-    # Ensure feedback is treated as a string, not a list
-    feedback_String = feedback  # No need to join if it's already a string
-
     try:
         cursor = mysql.connection.cursor()
-        cursor.execute('''INSERT INTO Resumes (feedback) 
-                        VALUES (%s)''', (feedback_String,))
+        cursor.execute('''INSERT INTO Resumes (user_id, file_path, status, skills, feedback) 
+                          VALUES (%s, %s, 'Pending', %s, %s)''', (user_id, file_path, skills_string, feedback))
         resume_id = cursor.lastrowid
         mysql.connection.commit()
     except Exception as e:
         mysql.connection.rollback()
-        logging.error(f"Feedback Insertion Database error: {e}")
+        logging.error(f"Database error: {e}")
         return jsonify({'error': f"Database error: {e}"}), 500
     finally:
         cursor.close()
@@ -935,14 +916,14 @@ def shortlist_students(job_id):
 
     cursor = mysql.connection.cursor()  # Ensure this is set up properly
     try:
-        # #fetch the job's shortlist status
-        # cursor.execute("SELECT shortlist_status FROM Job_Postings WHERE job_id = %s", (job_id,))
-        # job = cursor.fetchone()
+        #fetch the job's shortlist status
+        cursor.execute("SELECT shortlist_status FROM Job_Postings WHERE job_id = %s", (job_id,))
+        job = cursor.fetchone()
 
-        # if not job:
-        #     return jsonify({"message": "Job not found"}), 404
+        if not job:
+            return jsonify({"message": "Job not found"}), 404
         
-        # shortlist_status = job[0]  # Extract shortlist_status
+        shortlist_status = job[0]  # Extract shortlist_status
 
         # Fetch students based on their scores, ordered by score
         cursor.execute("""
