@@ -430,6 +430,44 @@ def upload_resume():
     # Secondary_Skills = "Tkinter, Express.js, BootStrap, SMTP, Object-Oriented Programming (OOP), Data Structures and Algorithms, Cloudinary, JavaScript, Slack"
     # Other_Skills = "React.js, Node.js, Azure, GitHub, JUnit, Selenium, MongoDB, PostgreSQL, TensorFlow"
 
+    feedback_prompt = f"""
+        You are reviewing a candidate's resume, which is provided as follows: {resume_text}. 
+        The job role requires the following skills:
+        - Primary Skills: {Primary_Skills}
+        - Secondary Skills: {Secondary_Skills}
+        - Other Skills: {Other_Skills}
+
+        Your task is to assess how well the candidate's skills match the job requirements. 
+        Identify the skills that are well-matched, partially matched, and missing. Focus on the Primary Skills as the most crucial, followed by Secondary Skills, and then Other Skills.
+
+        Based on your analysis, provide detailed feedback on:
+        1. Strengths: Highlight the skills where the candidate meets or exceeds the job requirements.
+        2. Areas for Improvement: Identify the missing or underrepresented skills in the resume. Prioritize feedback on Primary Skills first, then Secondary, and finally Other Skills.
+        3. Recommendations: Suggest actionable steps, including relevant courses, certifications, or experiences the candidate can pursue to improve the missing or underdeveloped skills.
+        """
+
+    feedback = get_gemini_response(feedback_prompt)
+
+    if feedback is None:
+        return jsonify({'error': 'Failed to extract skills'}), 500
+
+    # Ensure feedback is treated as a string, not a list
+    feedback_String = feedback  # No need to join if it's already a string
+
+    try:
+        cursor = mysql.connection.cursor()
+        cursor.execute('''INSERT INTO Resumes (feedback) 
+                        VALUES (%s)''', (feedback_String,))
+        resume_id = cursor.lastrowid
+        mysql.connection.commit()
+    except Exception as e:
+        mysql.connection.rollback()
+        logging.error(f"Feedback Insertion Database error: {e}")
+        return jsonify({'error': f"Database error: {e}"}), 500
+    finally:
+        cursor.close()
+
+
     jd_Primary_Skills = extract_skills(Primary_Skills)
     jd_Secondary_Skills = extract_skills(Secondary_Skills)
     jd_Other_Skills = extract_skills(Other_Skills)
