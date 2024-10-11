@@ -75,7 +75,7 @@ const HRSignUp = () => {
       // Redirect to HR Sign In after successful signup
       setTimeout(() => {
         navigate("/hr-signin"); // Redirect to HR SignIn
-      }, 2000); // Optional delay before redirect
+      }, 1000); // Optional delay before redirect
     } catch (error) {
       setError(
         error.response ? error.response.data.error : "An error occurred"

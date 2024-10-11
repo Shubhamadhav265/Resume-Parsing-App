@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useNavigate } from "react-router-dom"; // Import useNavigate
+import axios from "axios";
 
 function JobPosting() {
   const [formData, setFormData] = useState({
@@ -14,6 +16,8 @@ function JobPosting() {
 
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+
+  const navigate = useNavigate(); // Initialize useNavigate hook
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -54,6 +58,12 @@ function JobPosting() {
         package: '',
         stipend_amount: ''
       }); // Reset form after successful submission
+
+      // Redirect to candidate login page after successful signup
+      setTimeout(() => {
+        navigate("/hr-dashboard");
+      }, 2000); // Delay redirection by 2 seconds to show success message
+
     } catch (error) {
       console.error('Error:', error);
       setError(error.message);
