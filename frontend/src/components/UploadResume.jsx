@@ -2,14 +2,13 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
-const UploadResume = ({ onClose, jobId, onJobUploaded }) => {
+const UploadResume = ({ jobId, jobTitle, companyName, onJobUploaded, onClose }) => {
     const [file, setFile] = useState(null);
-    const [error, setError] = useState("");
-
+    const [error, setError] = useState(null);
     const navigate = useNavigate();
 
-    const handleFileChange = (e) => {
-        setFile(e.target.files[0]);
+    const handleFileChange = (event) => {
+        setFile(event.target.files[0]);
     };
 
     const handleUpload = async () => {
@@ -31,7 +30,18 @@ const UploadResume = ({ onClose, jobId, onJobUploaded }) => {
             });
 
             console.log("Resume uploaded successfully:", response.data);
-            onJobUploaded(jobId); // Call the callback with jobId
+
+            // Prepare job details with title and company name
+            const jobDetails = {
+                job_id: jobId,
+                title: jobTitle,  // Using props jobTitle
+                company_name: companyName,  // Using props companyName
+                status: "Pending",  // Manually set the status
+            };
+
+            // Call the callback with job details to update the applied jobs
+            onJobUploaded(jobDetails);
+
             navigate("/cand-dashboard", { replace: true });
             onClose();
         } catch (error) {

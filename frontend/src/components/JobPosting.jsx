@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate } from "react-router-dom"; // Import useNavigate
-import axios from "axios";
 
 function JobPosting() {
   const [formData, setFormData] = useState({

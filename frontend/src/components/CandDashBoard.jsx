@@ -8,6 +8,8 @@ const CandDashBoard = () => {
     const [availableJobs, setAvailableJobs] = useState([]);
     const [isUploading, setIsUploading] = useState(false);
     const [selectedJobId, setSelectedJobId] = useState(null);
+    const [selectedJobTitle, setSelectedJobTitle] = useState(null);
+    const [selectedCompanyName, setSelectedCompanyName] = useState(null);
 
     useEffect(() => {
         const fetchAppliedJobs = async () => {
@@ -36,15 +38,19 @@ const CandDashBoard = () => {
         fetchAvailableJobs();
     }, []);
 
-    const handleApply = (jobId) => {
+    const handleApply = (jobId, jobTitle, companyName) => {
         console.log(`Applying for job ID: ${jobId}`);
         setSelectedJobId(jobId);
+        setSelectedJobTitle(jobTitle);
+        setSelectedCompanyName(companyName);
         setIsUploading(true);
     };
 
     const closeUploadResume = () => {
         setIsUploading(false);
         setSelectedJobId(null);
+        setSelectedJobTitle(null);
+        setSelectedCompanyName(null);
     };
 
     const navigate = useNavigate();
@@ -61,6 +67,11 @@ const CandDashBoard = () => {
     // New function to remove job from available jobs
     const removeJobFromAvailable = (jobId) => {
         setAvailableJobs((prevJobs) => prevJobs.filter((job) => job.job_id !== jobId));
+    };
+
+    // New function to add applied job in the applied job section
+    const addJobToApplied = (jobDetails) => {
+        setAppliedJobs((prevJobs) => [...prevJobs, jobDetails]); // Add the applied job to the appliedJobs state
     };
 
     return (
@@ -98,7 +109,10 @@ const CandDashBoard = () => {
                             <p style={styles.jobStipend}>
                                 Stipend: {job.stipend_amount || "N/A"}
                             </p>
-                            <button onClick={() => handleApply(job.job_id)} style={styles.applyButton}>
+                            <button
+                                onClick={() => handleApply(job.job_id, job.title, job.company_name)}
+                                style={styles.applyButton}
+                            >
                                 Apply
                             </button>
                         </div>
@@ -112,7 +126,12 @@ const CandDashBoard = () => {
                 <UploadResume
                     onClose={closeUploadResume}
                     jobId={selectedJobId}
-                    onJobUploaded={removeJobFromAvailable} // Pass the callback
+                    jobTitle={selectedJobTitle}
+                    companyName={selectedCompanyName}
+                    onJobUploaded={(jobDetails) => {
+                        removeJobFromAvailable(jobDetails.job_id);
+                        addJobToApplied(jobDetails); // Call to add the applied job
+                    }}
                 />
             )}
         </div>
