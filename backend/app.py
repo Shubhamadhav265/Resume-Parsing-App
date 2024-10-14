@@ -415,20 +415,15 @@ def upload_resume():
 
 
     feedback_prompt = f"""
-        You are reviewing a candidate's resume, which is provided as follows: {resume_text}. 
-        The job role requires the following skills:
-        - Primary Skills: {Primary_Skills}
-        - Secondary Skills: {Secondary_Skills}
-        - Other Skills: {Other_Skills}
+    You are reviewing a candidate's resume: {resume_text}. The job role requires:
+    - Primary Skills: {Primary_Skills}
+    - Secondary Skills: {Secondary_Skills}
+    - Other Skills: {Other_Skills}
 
-        Your task is to assess how well the candidate's skills match the job requirements. 
-        Identify the skills that are well-matched, partially matched, and missing. Focus on the Primary Skills as the most crucial, followed by Secondary Skills, and then Other Skills.
-
-        Based on your analysis, provide detailed feedback on:
-        1. Strengths: Highlight the skills where the candidate meets or exceeds the job requirements.
-        2. Areas for Improvement: Identify the missing or underrepresented skills in the resume. Prioritize feedback on Primary Skills first, then Secondary, and finally Other Skills.
-        3. Recommendations: Suggest actionable steps, including relevant courses, certifications, or experiences the candidate can pursue to improve the missing or underdeveloped skills.
-        """
+    Provide a very-very short analysis highlighting (only in 4 lines in total): 
+    1. Missing or underrepresented skills (focus on Primary, then Secondary, then Other). 
+    2. Actionable recommendations, including relevant courses or certifications for improvement.
+    """
 
     feedback = get_gemini_response(feedback_prompt)
 
@@ -981,6 +976,29 @@ def shortlist_students(job_id):
     finally:
         cursor.close()  # Ensure the cursor is closed
    
+
+@app.route('/feedback/<int:job_id>', methods=['GET'])
+def get_feedback(job_id):
+    try:
+        cursor = mysql.connection.cursor()  # Ensure this is set up properly
+        # SQL query to fetch feedback from resumes table based on job_id
+        query = """
+            SELECT r.feedback 
+            FROM Resumes r
+            JOIN Applications a ON r.resume_id = a.resume_id
+            WHERE a.job_id = %s
+        """
+        cursor.execute(query, (job_id,))
+        result = cursor.fetchone()
+
+        if result:
+            return jsonify({"feedback": result[0]}), 200
+        else:
+            return jsonify({"feedback": "No feedback available for this job."}), 404
+    except Exception as e:
+        print(f"Error fetching feedback: {str(e)}")
+        return jsonify({"error": "Internal server error"}), 500
+
 
 @app.route('/logout', methods=['POST'])
 def logout():
