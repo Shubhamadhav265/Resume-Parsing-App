@@ -611,6 +611,17 @@ def create_job_posting():
         package = data.get('package')
         stipend_amount = data.get('stipend_amount')
 
+        pri_skills_wt = data.get('pri_skills_wt')
+        sec_skills_wt = data.get('sec_skills_wt')
+        oth_skills_wt = data.get('oth_skills_wt')
+        pri_wm_skills_wt = data.get('pri_wm_skills_wt')
+        sec_wn_skills_wt = data.get('sec_wn_skills_wt')
+        pri_proj_skills_wt = data.get('pri_proj_skills_wt')
+        sec_proj_skills_wt = data.get('sec_proj_skills_wt')
+        fil_wt = data.get('fil_wt')
+        certi_wt = data.get('certi_wt')
+        hack_wt = data.get('hack_wt')
+
         # Check for missing required fields and log them
         required_fields = ['company_name', 'job_description', 'role', 'primary_skills']
         missing_fields = [field for field in required_fields if not data.get(field)]
@@ -623,7 +634,7 @@ def create_job_posting():
             # Ensure that package and stipend_amount are either None or valid floats
             package = float(package) if package else None
             stipend_amount = float(stipend_amount) if stipend_amount else None
-        except ValueError as e:
+        except ValueError:
             logging.error(f"Invalid data type for numeric fields: package - {package}, stipend_amount - {stipend_amount}")
             return jsonify({'error': 'Package and stipend_amount must be valid numbers'}), 400
 
@@ -639,28 +650,35 @@ def create_job_posting():
         cursor = mysql.connection.cursor()
         logging.info("Database connection established successfully.")
 
-        # Step 6: Execute the database insert query
+        # Step 6: Execute the database insert query for Job_Postings
         try:
-            query = '''INSERT INTO Job_Postings (user_id, title, description, primary_skills, secondary_skills, other_skills, company_name, package, stipend_amount) 
-                       VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)'''
-            cursor.execute(query, (user_id, role, job_description, primary_skills, secondary_skills, other_skills, company_name, package, stipend_amount))
+            job_posting_query = '''INSERT INTO Job_Postings (user_id, title, description, primary_skills, secondary_skills, other_skills, company_name, package, stipend_amount) 
+                                   VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)'''
+            cursor.execute(job_posting_query, (user_id, role, job_description, primary_skills, secondary_skills, other_skills, company_name, package, stipend_amount))
+            job_id = cursor.lastrowid  # Retrieve the ID of the newly inserted job posting
+            
+            # Step 7: Insert data into the Weightages table
+            weightages_query = '''INSERT INTO Weightages (job_id, pri_skills_wt, sec_skills_wt, oth_skills_wt, pri_wm_skills_wt, sec_wn_skills_wt, pri_proj_skills_wt, sec_proj_skills_wt, fil_wt, certi_wt, hack_wt) 
+                                  VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'''
+            cursor.execute(weightages_query, (job_id, pri_skills_wt, sec_skills_wt, oth_skills_wt, pri_wm_skills_wt, sec_wn_skills_wt, pri_proj_skills_wt, sec_proj_skills_wt, fil_wt, certi_wt, hack_wt))
+            
             mysql.connection.commit()
-            logging.info("Job posting created successfully in the database.")
-            return jsonify({'message': 'Job posting created successfully'}), 201
+            logging.info("Job posting and weightages created successfully in the database.")
+            return jsonify({'message': 'Job posting and weightages created successfully'}), 201
         
         except Exception as e:
-            # Step 7: Handle any database-related errors
+            # Step 8: Handle any database-related errors
             mysql.connection.rollback()
             logging.error(f"Database insertion error: {str(e)}")
             return jsonify({'error': f"Database error: {str(e)}"}), 500
         
         finally:
-            # Step 8: Ensure cursor is closed
+            # Step 9: Ensure cursor is closed
             cursor.close()
             logging.info("Database cursor closed.")
 
     except Exception as e:
-        # Step 9: Catch any unexpected errors
+        # Step 10: Catch any unexpected errors
         logging.error(f"An unexpected error occurred: {str(e)}")
         return jsonify({'error': f"An unexpected error occurred: {str(e)}"}), 500
 
