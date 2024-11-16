@@ -1,0 +1,112 @@
+CREATE DATABASE smarthire;
+USE smarthire;
+
+-- Table 1: Users
+CREATE TABLE Users (
+    user_id INT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    role ENUM('HR', 'Candidate') NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+SELECT * FROM Users;
+-- DROP DATABASE smarthire;
+
+-- Table 2: Resumes
+CREATE TABLE Resumes (
+    resume_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    file_path VARCHAR(255),
+    uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status ENUM('Pending', 'Reviewed', 'Shortlisted', 'Rejected') DEFAULT 'Pending',
+    skills TEXT,
+    feedback TEXT,
+    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
+);
+
+SELECT * FROM Resumes;
+
+-- Table 3: Job_Postings
+CREATE TABLE Job_Postings (
+    job_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    company_name VARCHAR(255),
+    title VARCHAR(255),
+    description TEXT,
+    primary_skills VARCHAR(255),
+    secondary_skills VARCHAR(255),
+    other_skills VARCHAR(255),
+    package DECIMAL(10, 2),
+    stipend_amount DECIMAL(10, 2),
+    shortlist_status ENUM('Yes', 'No') DEFAULT 'No',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+SELECT * FROM Job_Postings;
+
+
+-- Table 4: Applications
+CREATE TABLE Applications (
+    application_id INT AUTO_INCREMENT PRIMARY KEY,
+    job_id INT,
+    user_id INT,
+    resume_id INT,
+    applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status ENUM('Pending', 'Shortlisted', 'Rejected') DEFAULT 'Pending',
+    FOREIGN KEY (job_id) REFERENCES Job_Postings(job_id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (resume_id) REFERENCES Resumes(resume_id) ON DELETE CASCADE
+);
+
+SELECT * FROM Applications;
+
+
+-- Table 5: Evaluation_Results
+CREATE TABLE Evaluation_Results (
+    result_id INT AUTO_INCREMENT PRIMARY KEY,
+    application_id INT,
+    score FLOAT NOT NULL,
+    evaluation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (application_id) REFERENCES Applications(application_id) ON DELETE CASCADE
+);
+
+SELECT * FROM Evaluation_Results;
+
+-- Table 6: Student_Info
+CREATE TABLE Student_Info (
+    student_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,  -- Foreign key to Users table
+    full_name VARCHAR(255) NOT NULL,
+	contact_number VARCHAR(10),
+    college_name VARCHAR(255) NOT NULL,
+    degree VARCHAR(255) NOT NULL,
+    cgpa DECIMAL(3, 2),  -- Example: 9.50
+    graduation_year INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
+);
+
+SELECT * FROM student_Info;
+
+
+-- Table 7: HR Information
+CREATE TABLE HR_Info (
+    hr_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    full_name VARCHAR(255) NOT NULL,
+    contact_number VARCHAR(10) NOT NULL,
+    company_name VARCHAR(255) NOT NULL,
+    position VARCHAR(255) NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
+);
+
+ 
+ select * from users;
+ select * from student_info;
+ select * from HR_Info;
+
+
+-- select * from users u join student_info s on u.user_id = s.user_id;
+-- DROP DATABASE smarthire;
