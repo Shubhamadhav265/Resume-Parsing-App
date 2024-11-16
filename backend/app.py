@@ -387,6 +387,31 @@ def upload_resume():
             Primary_Skills = f"{primary_skills}"
             Secondary_Skills = f"{secondary_skills}"
             Other_Skills = f"{other_skills}"
+        
+                # Fetching weightages from the Weightages table
+        cursor.execute(
+            '''SELECT pri_skills_wt, sec_skills_wt, oth_skills_wt, pri_wm_skills_wt, sec_wn_skills_wt, 
+                      pri_proj_skills_wt, sec_proj_skills_wt, fil_wt, certi_wt, hack_wt
+               FROM Weightages 
+               WHERE job_id = %s''', 
+            (job_id,)
+        )
+        weightages = cursor.fetchone()
+
+        if not weightages:
+            logging.error("No weightages found for the provided job_id.")
+            return jsonify({'error': 'No weightages data found for this job'}), 404
+
+        # Mapping weightages to corresponding variables
+        (
+            pri_skills_wt, sec_skills_wt, oth_skills_wt, pri_wm_skills_wt, sec_wn_skills_wt, 
+            pri_proj_skills_wt, sec_proj_skills_wt, fil_wt, certi_wt, hack_wt
+        ) = weightages
+
+        logging.debug(f"Weightages stored in variables: pri_skills_wt={pri_skills_wt}, sec_skills_wt={sec_skills_wt}, "
+                      f"oth_skills_wt={oth_skills_wt}, pri_wm_skills_wt={pri_wm_skills_wt}, sec_wn_skills_wt={sec_wn_skills_wt}, "
+                      f"pri_proj_skills_wt={pri_proj_skills_wt}, sec_proj_skills_wt={sec_proj_skills_wt}, fil_wt={fil_wt}, "
+                      f"certi_wt={certi_wt}, hack_wt={hack_wt}")
 
     except Exception as e:
         logging.error(f"Database error: {e}")
@@ -506,16 +531,16 @@ def upload_resume():
             per_sec_project_matching_skills = round(((len(Sec_project_matching_skills))/(len(jd_Secondary_Skills))) * 100, 2)
 
             filing_total = total_publications + copyrights + patents
-            per_filing_score = 5 if filing_total >= 1 else 0
+            per_filing_score = fil_wt if filing_total >= 1 else 0
 
             matching_certifications = set(certifications).intersection(standard_certifications)
             count_matching_std_certifications = len(matching_certifications)
-            per_certi_Score = 5 if count_matching_std_certifications >= 1 else 3
+            per_certi_Score = certi_wt if count_matching_std_certifications >= 1 else certi_wt/2
 
-            per_hackathon_score = 4 if hackathon_participation == 1 else 0
+            per_hackathon_score = hack_wt if hackathon_participation == 1 else 0
 
             # Final Rubrick Formula
-            Final_score = (0.4 * per_primary_skill_match) + (0.2 * per_secondary_skill_match) + (0.1 * per_other_skill_match) + (0.056 * per_pri_work_matching_skills) + (0.024 * per_sec_work_matching_skills) + (0.056 * per_pri_project_matching_skills) + (0.024 * per_sec_project_matching_skills) + (per_filing_score) + (per_certi_Score) + (per_hackathon_score) 
+            Final_score = ((pri_skills_wt/100) * per_primary_skill_match) + ((sec_skills_wt/100) * per_secondary_skill_match) + ((oth_skills_wt/100) * per_other_skill_match) + ((pri_wm_skills_wt/100) * per_pri_work_matching_skills) + ((sec_wn_skills_wt/100) * per_sec_work_matching_skills) + ((pri_proj_skills_wt/100) * per_pri_project_matching_skills) + ((sec_proj_skills_wt/100) * per_sec_project_matching_skills) + (per_filing_score) + (per_certi_Score) + (per_hackathon_score) 
             # logging.debug(f"Final Score of the Candidate: {Final_score}")
 
             logging.info(f"Final Score Calculated: {Final_score}")

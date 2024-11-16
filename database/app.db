@@ -46,7 +46,26 @@ CREATE TABLE Job_Postings (
 SELECT * FROM Job_Postings;
 
 
--- Table 4: Applications
+-- Table 4: Weightages
+CREATE TABLE Weightages(
+	job_id INT,
+    pri_skills_wt INT,
+    sec_skills_wt INT,
+    oth_skills_wt INT,
+    pri_wm_skills_wt INT,
+    sec_wn_skills_wt INT,
+    pri_proj_skills_wt INT,
+    sec_proj_skills_wt INT,
+    fil_wt INT,
+    certi_wt INT,
+    hack_wt INT,        
+    FOREIGN KEY (job_id) REFERENCES Job_Postings(job_id) ON DELETE CASCADE    
+);
+
+SELECT * FROM Weightages;
+
+
+-- Table 5: Applications
 CREATE TABLE Applications (
     application_id INT AUTO_INCREMENT PRIMARY KEY,
     job_id INT,
@@ -62,7 +81,7 @@ CREATE TABLE Applications (
 SELECT * FROM Applications;
 
 
--- Table 5: Evaluation_Results
+-- Table 6: Evaluation_Results
 CREATE TABLE Evaluation_Results (
     result_id INT AUTO_INCREMENT PRIMARY KEY,
     application_id INT,
@@ -73,7 +92,7 @@ CREATE TABLE Evaluation_Results (
 
 SELECT * FROM Evaluation_Results;
 
--- Table 6: Student_Info
+-- Table 7: Student_Info
 CREATE TABLE Student_Info (
     student_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT,  -- Foreign key to Users table
@@ -91,7 +110,7 @@ CREATE TABLE Student_Info (
 SELECT * FROM student_Info;
 
 
--- Table 7: HR Information
+-- Table 8: HR Information
 CREATE TABLE HR_Info (
     hr_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
