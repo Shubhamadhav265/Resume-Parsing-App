@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import CandSignup from "./components/candSignUp";
 import HRSignup from "./components/HRSignUp";
 import HRSignin from "./components/HRSignIn";
@@ -14,22 +14,6 @@ const App = () => {
   return (
     <Router>
       <div style={styles.appContainer}>
-        <h1 style={styles.title}>Recruitment Portal</h1>
-        <nav style={styles.nav}>
-          <ul style={styles.navList}>
-            <li style={styles.navItem}>
-              <Link to="/" style={styles.navLink}>
-                Home
-              </Link>
-            </li>
-            <li style={styles.navItem}>
-              <Link to="/job-posting" style={styles.navLink}>
-                Create Job Posting
-              </Link>
-            </li>
-          </ul>
-        </nav>
-
         <div style={styles.container}>
           <Routes>
             <Route path="/" element={<LandingPage />} />
@@ -40,7 +24,10 @@ const App = () => {
             <Route path="/hr-dashboard" element={<HrDashboard />} />
             <Route path="/cand-dashboard" element={<CandDashboard />} />
             <Route path="/job-posting" element={<JobPosting />} />
-            <Route path="/student-rankings/:job_id" element={<StudentRankings />} />
+            <Route
+              path="/student-rankings/:job_id"
+              element={<StudentRankings />}
+            />
           </Routes>
         </div>
       </div>
@@ -51,7 +38,6 @@ const App = () => {
 const styles = {
   appContainer: {
     textAlign: "center",
-    padding: "20px",
   },
   title: {
     fontSize: "2.5em",
@@ -74,9 +60,9 @@ const styles = {
     color: "#4CAF50",
     fontSize: "1.2em",
   },
-  container: {
-    padding: "20px",
-  },
+  // container: {
+  //   padding: "0px",
+  // },
 };
 
 export default App;

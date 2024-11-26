@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import UploadResume from "./UploadResume";
-import Feedback from "./Feedback"; // Import the Feedback component
+import Feedback from "./Feedback";
 
 const CandDashBoard = () => {
   const [appliedJobs, setAppliedJobs] = useState([]);
@@ -46,7 +46,6 @@ const CandDashBoard = () => {
   }, []);
 
   const handleApply = (jobId, jobTitle, companyName) => {
-    console.log(`Applying for job ID: ${jobId}`);
     setSelectedJobId(jobId);
     setSelectedJobTitle(jobTitle);
     setSelectedCompanyName(companyName);
@@ -84,7 +83,6 @@ const CandDashBoard = () => {
   };
 
   const handleFeedback = async (jobId) => {
-    console.log(`Requesting feedback for job ID: ${jobId}`);
     try {
       const response = await axios.get(
         `http://localhost:5000/feedback/${jobId}`,
@@ -92,7 +90,7 @@ const CandDashBoard = () => {
           withCredentials: true,
         }
       );
-      setFeedback(response.data.feedback); // Assuming API returns { feedback: "feedback text" }
+      setFeedback(response.data.feedback);
       setIsFeedbackModalOpen(true);
     } catch (error) {
       console.error("Error fetching feedback:", error);
@@ -101,20 +99,25 @@ const CandDashBoard = () => {
 
   const closeFeedbackModal = () => {
     setIsFeedbackModalOpen(false);
-    setFeedback(""); // Clear feedback when closing modal
+    setFeedback("");
   };
 
   return (
     <div style={styles.container}>
-      <h2 style={styles.heading}>Candidate Dashboard</h2>
-      <button onClick={handleLogout} style={styles.logoutButton}>
-        Logout
-      </button>
-      <h3 style={styles.subHeading}>Applied Jobs</h3>
-      <div style={styles.jobContainer}>
-        {appliedJobs.length > 0 ? (
-          appliedJobs.map((job) => {
-            return (
+      {/* Navbar */}
+      <nav style={styles.navbar}>
+        <div style={styles.logo}>Candidate Dashboard</div>
+        <button onClick={handleLogout} style={styles.logoutButton}>
+          Logout
+        </button>
+      </nav>
+
+      {/* Applied Jobs Section */}
+      <div style={styles.content}>
+        <h2 style={styles.heading}>Applied Jobs</h2>
+        <div style={styles.jobContainer}>
+          {appliedJobs.length > 0 ? (
+            appliedJobs.map((job) => (
               <div key={job.id} style={styles.jobCard}>
                 <h4 style={styles.jobTitle}>{job.title}</h4>
                 <p style={styles.jobCompany}>{job.company_name}</p>
@@ -131,38 +134,39 @@ const CandDashBoard = () => {
                   </button>
                 )}
               </div>
-            );
-          })
-        ) : (
-          <p style={styles.noJobsText}>No applied jobs found.</p>
-        )}
-      </div>
+            ))
+          ) : (
+            <p style={styles.noJobsText}>No applied jobs found.</p>
+          )}
+        </div>
 
-      <h3 style={styles.subHeading}>Available Jobs</h3>
-      <div style={styles.jobContainer}>
-        {availableJobs.length > 0 ? (
-          availableJobs.map((job) => (
-            <div key={job.job_id} style={styles.jobCard}>
-              <h4 style={styles.jobTitle}>{job.title}</h4>
-              <p style={styles.jobCompany}>{job.company_name}</p>
-              <p style={styles.jobDescription}>{job.description}</p>
-              <p style={styles.jobPackage}>Package: {job.package || "N/A"}</p>
-              <p style={styles.jobStipend}>
-                Stipend: {job.stipend_amount || "N/A"}
-              </p>
-              <button
-                onClick={() =>
-                  handleApply(job.job_id, job.title, job.company_name)
-                }
-                style={styles.applyButton}
-              >
-                Apply
-              </button>
-            </div>
-          ))
-        ) : (
-          <p style={styles.noJobsText}>No available jobs found.</p>
-        )}
+        {/* Available Jobs Section */}
+        <h2 style={styles.heading}>Available Jobs</h2>
+        <div style={styles.jobContainer}>
+          {availableJobs.length > 0 ? (
+            availableJobs.map((job) => (
+              <div key={job.job_id} style={styles.jobCard}>
+                <h4 style={styles.jobTitle}>{job.title}</h4>
+                <p style={styles.jobCompany}>{job.company_name}</p>
+                <p style={styles.jobDescription}>{job.description}</p>
+                <p style={styles.jobPackage}>Package: {job.package || "N/A"}</p>
+                <p style={styles.jobStipend}>
+                  Stipend: {job.stipend_amount || "N/A"}
+                </p>
+                <button
+                  onClick={() =>
+                    handleApply(job.job_id, job.title, job.company_name)
+                  }
+                  style={styles.applyButton}
+                >
+                  Apply
+                </button>
+              </div>
+            ))
+          ) : (
+            <p style={styles.noJobsText}>No available jobs found.</p>
+          )}
+        </div>
       </div>
 
       {isUploading && (
@@ -185,65 +189,70 @@ const CandDashBoard = () => {
   );
 };
 
-// Define styles here...
 const styles = {
+  navbar: {
+    backgroundColor: "#2c3e50",
+    color: "#fff",
+    padding: "15px 30px",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    position: "sticky",
+    top: 0,
+    zIndex: 1000,
+    boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
+  },
+  logo: {
+    fontSize: "1.5rem",
+    fontWeight: "bold",
+  },
+  logoutButton: {
+    padding: "10px 20px",
+    backgroundColor: "#e74c3c",
+    color: "#fff",
+    border: "none",
+    borderRadius: "5px",
+    cursor: "pointer",
+    transition: "background-color 0.3s ease",
+  },
   container: {
+    fontFamily: "'Roboto', sans-serif",
+    backgroundColor: "#f9fafc",
+    minHeight: "100vh",
+  },
+  content: {
     padding: "20px",
-    backgroundColor: "#f9f9f9",
-    borderRadius: "8px",
-    boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
-    maxWidth: "800px",
-    margin: "0 auto",
   },
   heading: {
-    textAlign: "center",
+    fontSize: "2rem",
+    color: "#495057",
     marginBottom: "20px",
-    fontSize: "24px",
-    color: "#333",
-  },
-  subHeading: {
-    marginTop: "20px",
-    marginBottom: "10px",
-    fontSize: "20px",
-    color: "#555",
+    textAlign: "center",
   },
   jobContainer: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "10px",
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+    gap: "20px",
   },
   jobCard: {
-    padding: "15px",
-    border: "1px solid #ccc",
-    borderRadius: "5px",
-    backgroundColor: "#fff",
-    transition: "box-shadow 0.2s",
-    cursor: "pointer",
+    padding: "40px",
+    borderRadius: "10px",
+    backgroundColor: "#ffffff",
+    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
   },
   jobTitle: {
-    fontSize: "18px",
-    margin: "0 0 5px 0",
-    color: "#007bff",
+    fontSize: "1.25rem",
+    marginBottom: "10px",
+    color: "#2c3e50",
   },
-  jobCompany: {
-    margin: "5px 0",
-    color: "#777",
-  },
-  jobDescription: {
-    margin: "5px 0",
-    color: "#555",
-  },
-  jobPackage: {
-    margin: "5px 0",
-    color: "#333",
-  },
-  jobStipend: {
-    margin: "5px 0",
-    color: "#333",
-  },
-  jobStatus: {
-    margin: "5px 0",
-    fontWeight: "bold",
+  feedbackButton: {
+    marginTop: "10px",
+    padding: "10px 15px",
+    backgroundColor: "#28a745",
+    color: "#fff",
+    border: "none",
+    borderRadius: "5px",
+    cursor: "pointer",
   },
   applyButton: {
     padding: "10px 20px",
@@ -253,24 +262,8 @@ const styles = {
     borderRadius: "5px",
     cursor: "pointer",
   },
-  feedbackButton: {
-    padding: "10px 20px",
-    backgroundColor: "#28a745",
-    color: "#fff",
-    border: "none",
-    borderRadius: "5px",
-    cursor: "pointer",
-  },
-  logoutButton: {
-    float: "right",
-    padding: "10px 20px",
-    backgroundColor: "#dc3545",
-    color: "#fff",
-    border: "none",
-    borderRadius: "5px",
-    cursor: "pointer",
-  },
   noJobsText: {
+    textAlign: "center",
     color: "#777",
   },
 };

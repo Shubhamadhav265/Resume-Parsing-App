@@ -1,0 +1,137 @@
+/* General Styles */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial', sans-serif;
+  }
+  
+  body {
+    background-color: #f4f7fc;
+    color: #333;
+  }
+  
+  /* Container */
+  .student-rankings-container {
+    width: 80%;
+    margin: 30px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  }
+  
+  .heading {
+    text-align: center;
+    color: #2c3e50;
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+  
+  /* Loader */
+  .loader {
+    text-align: center;
+    color: #396798;
+    font-size: 20px;
+  }
+  
+  /* Error Message */
+  .error {
+    text-align: center;
+    color: #e74c3c;
+    font-size: 18px;
+  }
+  
+  /* Table Styles */
+  .student-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+  }
+  
+  .student-table th,
+  .student-table td {
+    padding: 12px;
+    border: 1px solid #ddd;
+    text-align: left;
+  }
+  
+  .student-table th {
+    background-color: #2c5774;
+    color: white;
+    font-size: 16px;
+  }
+  
+  .student-table td {
+    font-size: 14px;
+  }
+  
+  .even-row {
+    background-color: #f9f9f9;
+  }
+  
+  .student-table tr:hover {
+    background-color: #ecf0f1;
+  }
+  
+  /* Shortlisting Form */
+  .shortlist-form {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+  }
+  
+  .shortlist-form label {
+    font-size: 16px;
+    margin-right: 10px;
+  }
+  
+  .candidate-select {
+    padding: 8px;
+    font-size: 14px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    margin-right: 15px;
+  }
+  
+  .shortlist-button {
+    padding: 10px 20px;
+    background-color: #2ecc71;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .shortlist-button:hover {
+    background-color: #27ae60;
+  }
+  
+  .shortlist-button:disabled {
+    background-color: #bdc3c7;
+    cursor: not-allowed;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .student-rankings-container {
+      width: 95%;
+    }
+  
+    .shortlist-form {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  
+    .candidate-select {
+      margin-bottom: 10px;
+    }
+  
+    .shortlist-button {
+      width: 100%;
+    }
+  }
+  
