@@ -1,209 +1,273 @@
-/* General Styling */
+/* General Reset */
+body, h1, h2, h3, p {
+  margin: 0;
+  padding: 0;
+  font-family: "Arial", sans-serif;
+}
+
 body {
-    margin: 0;
-    font-family: 'Arial', sans-serif;
-  }
-  
-  .landing-container {
-    width: 100%;
-    height: 100%;
-    background-color: #5baf26; /* Soft light blue */
-    color: #333333; /* Dark gray text for readability */
-  }
-  
-  /* Navigation Bar */
-  .navbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px;
-    background-color: #06525e; /* Muted teal */
-    color: white;
-  }
-  
-  .navbar .logo {
-    font-size: 1.5em;
-    font-weight: bold;
-  }
-  
-  .navbar .nav-links {
-    list-style: none;
-    display: flex;
-  }
-  
-  .navbar .nav-links li {
-    margin-left: 20px;
-  }
-  
-  .navbar .nav-links li a {
-    color: white;
-    text-decoration: none;
-    font-size: 1.1em;
-  }
-  
-  /* "Why Choose SmartHire" Section */
-  .why-choose {
-    background-color: #0d6874; /* Muted teal */
-    color: white;
-    text-align: center;
-    padding: 50px 20px;
-  }
-  
-  .why-choose h2 {
-    font-size: 2.5em;
-    margin-bottom: 20px;
-  }
-  
-  .why-choose p {
-    font-size: 1.2em;
-    margin-bottom: 30px;
-  }
-  
-  /* Signup Section (Candidate & HR) */
-  .signup-container {
-    display: flex;
-    justify-content: space-around;
-    padding: 40px 20px;
-    background-color: #C4DFE6; /* Soft light blue */
-  }
-  
-  .signup-part {
-    background-color: #0d6874; /* Muted teal */
-    color: white;
-    padding: 30px;
-    border-radius: 10px;
-    width: 40%;
-    text-align: center;
-  }
-  
-  .signup-part h3 {
-    font-size: 2em;
-    margin-bottom: 20px;
-  }
-  
-  .signup-part p {
-    font-size: 1.1em;
-    margin-bottom: 20px;
-  }
-  
-  .signup-part button {
-    background-color: #96bec8; /* Soft light blue */
-    color: #000708; /* Muted teal */
-    padding: 12px 30px;
-    border: none;
-    font-size: 1.1em;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  
-  .signup-part button:hover {
-    background-color: #0a3f46; /* Muted teal */
-    color: white;
-  }
-  
-  /* Start Now Section */
-  .start-now {
-    text-align: center;
-    padding: 50px;
-    background-color: #136c77; /* Muted teal */
-    color: white;
-  }
-  
-  .start-now h2 {
-    font-size: 2.5em;
-    margin-bottom: 30px;
-  }
-  
-  .start-now-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-  }
-  
-  .start-now-buttons button {
-    background-color: #96bec8; /* Soft light blue */
-    color: #000708;/* Muted teal */
-    border: none;
-    padding: 12px 30px;
-    font-size: 1.1em;
-    cursor: pointer;
-    border-radius: 5px;
-  }
-  
-  .start-now-buttons button:hover {
-    background-color: #136c77; /* Light beige */
-    color:WHITE; /* Dark gray */
-  }
-  
-  /* Hero Section */
+  overflow-x: hidden;
+}
+
+/* Static Navbar */
+.navbar {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 1000;
+  display: flex;
+  justify-content: space-between;
+  padding: 1em 2em;
+  background-color: #2C3E50;
+  color: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.navbar .logo {
+  font-size: 1.8rem;
+  font-weight: bold;
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 1.5rem;
+}
+
+.nav-links li a {
+  text-decoration: none;
+  color: white;
+  font-weight: bold;
+  transition: color 0.3s ease;
+}
+
+.nav-links li a:hover {
+  color: #ffdd40;
+}
+
+/* Hero Section */
+.hero-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6em 2em;
+  background: linear-gradient(to right, #2C3E50, #54b1e7);
+  color: white;
+  margin-top: 60px; /* Offset for fixed navbar */
+}
+
+.hero-content {
+  max-width: 50%;
+  text-align: left;
+}
+
+.hero-content h1 {
+  font-size: 3rem;
+  margin-bottom: 0.5em;
+}
+
+.hero-content p {
+  font-size: 1.2rem;
+  margin-bottom: 1em;
+}
+
+.cta-button {
+  padding: 0.8em 1.5em;
+  background-color: #ffdd40;
+  color: #4a90e2;
+  font-size: 1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cta-button:hover {
+  background-color: #ffcc00;
+}
+
+.hero-image img {
+  width: 100%;
+  max-width: 500px;
+  border-radius: 10px;
+  animation: fadeIn 2s ease-in-out;
+}
+
+/* Why Choose Section */
+.why-choose {
+  text-align: center;
+  padding: 3em 2em;
+  background: #f9f9f9;
+}
+
+.why-choose h2 {
+  font-size: 2rem;
+  color: #4a90e2;
+  margin-bottom: 0.5em;
+}
+
+.why-choose p {
+  font-size: 1.2rem;
+  color: #555;
+}
+
+/* Features Section */
+.features {
+  display: flex;
+  justify-content: space-around;
+  padding: 3em 2em;
+  background: #f9f9f9;
+}
+
+.feature {
+  text-align: center;
+  max-width: 25%;
+  padding: 1em;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.feature:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+}
+
+/* Signup Section */
+.signup-container {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 3em 2em;
+  background: white;
+  color: white;
+  border-radius: 10px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.signup-part {
+  text-align: center;
+  max-width: 40%;
+  background: linear-gradient(to right, #3f5a75, #499dcd);
+  padding: 2em;
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.signup-part:hover {
+  transform: scale(1.05);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+}
+
+.signup-part h3 {
+  font-size: 1.8rem;
+  color: white;
+  margin-bottom: 0.5em;
+}
+
+.signup-part p {
+  font-size: 1.2rem;
+  margin-bottom: 1em;
+}
+
+.signup-part button {
+  padding: 0.8em 1.5em;
+  background-color: white;
+  color: #4a90e2;
+  font-size: 1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.signup-part button:hover {
+  background-color: #1ac676;
+}
+
+/* Start Now Section */
+.start-now {
+  text-align: center;
+  padding: 3em 2em;
+  background: #F9F9F9;
+  color: rgb(100, 155, 103);
+}
+
+.start-now h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1em;
+}
+
+.start-now-buttons button {
+  padding: 0.8em 1.5em;
+  margin: 0 1em;
+  background: linear-gradient(to right, #3f5a75, #499dcd);
+  color: white;
+  font-size: 1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.start-now-buttons button:hover {
+  background-color: #ffcc00;
+}
+
+/* Footer */
+footer {
+  display: flex;
+  justify-content: space-around;
+  padding: 2em;
+  background-color: #213c5b;
+  color: white;
+}
+
+.footer-section {
+  max-width: 30%;
+}
+
+.footer-copy {
+  text-align: center;
+  margin-top: 1em;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
   .hero-section {
-    display: flex;
-    justify-content: space-between;
-    padding: 50px;
-    background-color: #C4DFE6; /* Soft light blue */
-    height: 60vh;
+    flex-direction: column;
+    text-align: center;
   }
-  
+
   .hero-content {
-    flex: 1;
+    max-width: 100%;
   }
-  
-  .hero-content h1 {
-    font-size: 3em;
-    color: #0e3439; /* Muted teal */
+
+  .hero-image {
+    margin-top: 1em;
   }
-  
-  .hero-content p {
-    font-size: 1.2em;
-    margin-top: 20px;
+
+  .features {
+    flex-direction: column;
+    align-items: center;
   }
-  
-  .swiping-section {
-    flex: 2;
-    display: flex;
-    overflow-x: auto;
-    gap: 20px;
+
+  .feature {
+    max-width: 90%;
+    margin-bottom: 1em;
   }
-  
-  .swipe-card {
-    background-color: #156b7cd7; /* Light beige */
-    color: #ffffff; /* Dark gray */
-    padding: 30px;
-    width: 300px;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+  .signup-container {
+    flex-direction: column;
   }
-  
-  .swipe-card h3 {
-    font-size: 1.5em;
-    color: #000000; /* Muted teal */
+
+  .signup-part {
+    max-width: 90%;
+    margin-bottom: 1.5em;
   }
-  
-  .swipe-card p {
-    font-size: 1.1em;
-    margin-bottom: 20px;
-  }
-  
-  .swipe-card h4 {
-    font-size: 1.2em;
-    font-weight: bold;
-  }
-  
-  /* Footer Section */
-  footer {
-    background-color: #0e5c67; /* Muted teal */
-    color: white;
-    display: flex;
-    justify-content: space-around;
-    padding: 40px 20px;
-  }
-  
-  .footer-section h3 {
-    font-size: 1.5em;
-    margin-bottom: 10px;
-  }
-  
-  .footer-section p {
-    font-size: 1.1em;
-  }
-  
+}
