@@ -54,7 +54,7 @@ const LandingPage = () => {
         </div>
         <div className="hero-image">
           <img
-            src="https://via.placeholder.com/600x400" // Replace with a suitable image URL
+            src="https://th.bing.com/th/id/R.b49e2428e02ccbb0e2a8f4b271f93256?rik=hWdasGKboibaoQ&riu=http%3a%2f%2fhrmasia.com%2fwp-content%2fuploads%2f2019%2f08%2f38150942_m.jpg&ehk=AazFSnXe8s0CPROuVSpm51z%2b2m1yku0rXyK7mkKp7SE%3d&risl=&pid=ImgRaw&r=0/900x400" // Replace with a suitable image URL
             alt="Hero"
           />
         </div>
@@ -93,7 +93,9 @@ const LandingPage = () => {
             Ready to embark on your career journey? Join us to find the best
             opportunities tailored for you.
           </p>
-          <button onClick={() => navigate("/candidate-signup")}>Signup as Candidate</button>
+          <button onClick={() => navigate("/candidate-signup")}>
+            Signup as Candidate
+          </button>
         </div>
         <div className="signup-part hr">
           <h3>HR Signup</h3>
@@ -109,7 +111,9 @@ const LandingPage = () => {
       <section className="start-now">
         <h2>Start Now</h2>
         <div className="start-now-buttons">
-          <button onClick={() => navigate("/candidate-signin")}>Candidate Signin</button>
+          <button onClick={() => navigate("/candidate-signin")}>
+            Candidate Signin
+          </button>
           <button onClick={() => navigate("/hr-signin")}>HR Signin</button>
         </div>
       </section>

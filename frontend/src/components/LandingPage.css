@@ -73,7 +73,7 @@ body {
 
 .cta-button {
   padding: 0.8em 1.5em;
-  background-color: #ffdd40;
+  background-color: #00efff;
   color: #4a90e2;
   font-size: 1rem;
   font-weight: bold;
@@ -140,7 +140,7 @@ body {
   display: flex;
   justify-content: space-around;
   align-items: center;
-  padding: 3em 2em;
+  padding: 7em 2em;
   background: white;
   color: white;
   border-radius: 10px;
@@ -175,7 +175,7 @@ body {
 
 .signup-part button {
   padding: 0.8em 1.5em;
-  background-color: white;
+  background-color: #00efff;
   color: #4a90e2;
   font-size: 1rem;
   font-weight: bold;
@@ -186,13 +186,13 @@ body {
 }
 
 .signup-part button:hover {
-  background-color: #1ac676;
+  background-color: #ffcc00;
 }
 
 /* Start Now Section */
 .start-now {
   text-align: center;
-  padding: 3em 2em;
+  padding: 7em 2em;
   background: #F9F9F9;
   color: rgb(100, 155, 103);
 }
@@ -223,8 +223,8 @@ body {
 footer {
   display: flex;
   justify-content: space-around;
-  padding: 2em;
-  background-color: #213c5b;
+  padding: 1.5em;
+  background-color: #22456e;
   color: white;
 }
 
