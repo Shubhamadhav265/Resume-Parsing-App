@@ -7,7 +7,7 @@ import Feedback from "./Feedback";
 const CandDashBoard = () => {
   const [appliedJobs, setAppliedJobs] = useState([]);
   const [availableJobs, setAvailableJobs] = useState([]);
-  const [isUploading, setIsUploading] = useState(false);
+  const [isUploadResumeModalOpen, setIsUploadResumeModalOpen] = useState(false);
   const [selectedJobId, setSelectedJobId] = useState(null);
   const [selectedJobTitle, setSelectedJobTitle] = useState(null);
   const [selectedCompanyName, setSelectedCompanyName] = useState(null);
@@ -49,11 +49,11 @@ const CandDashBoard = () => {
     setSelectedJobId(jobId);
     setSelectedJobTitle(jobTitle);
     setSelectedCompanyName(companyName);
-    setIsUploading(true);
+    setIsUploadResumeModalOpen(true); // Open UploadResume modal
   };
 
-  const closeUploadResume = () => {
-    setIsUploading(false);
+  const closeUploadResumeModal = () => {
+    setIsUploadResumeModalOpen(false); // Close UploadResume modal
     setSelectedJobId(null);
     setSelectedJobTitle(null);
     setSelectedCompanyName(null);
@@ -169,25 +169,37 @@ const CandDashBoard = () => {
         </div>
       </div>
 
-      {isUploading && (
-        <UploadResume
-          onClose={closeUploadResume}
-          jobId={selectedJobId}
-          jobTitle={selectedJobTitle}
-          companyName={selectedCompanyName}
-          onJobUploaded={(jobDetails) => {
-            removeJobFromAvailable(jobDetails.job_id);
-            addJobToApplied(jobDetails);
-          }}
-        />
+      {/* UploadResume Modal */}
+      {isUploadResumeModalOpen && (
+        <div style={styles.modalBackdrop}>
+          <div style={styles.modalContent}>
+            <UploadResume
+              onClose={closeUploadResumeModal}
+              jobId={selectedJobId}
+              jobTitle={selectedJobTitle}
+              companyName={selectedCompanyName}
+              onJobUploaded={(jobDetails) => {
+                removeJobFromAvailable(jobDetails.job_id);
+                addJobToApplied(jobDetails);
+                closeUploadResumeModal();
+              }}
+            />
+          </div>
+        </div>
       )}
 
+      {/* Feedback Modal */}
       {isFeedbackModalOpen && (
-        <Feedback feedback={feedback} onClose={closeFeedbackModal} />
+        <div style={styles.modalBackdrop}>
+          <div style={styles.modalContent}>
+            <Feedback feedback={feedback} onClose={closeFeedbackModal} />
+          </div>
+        </div>
       )}
     </div>
   );
 };
+
 
 const styles = {
   navbar: {
@@ -265,6 +277,26 @@ const styles = {
   noJobsText: {
     textAlign: "center",
     color: "#777",
+  },
+  modalBackdrop: {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1000,
+  },
+  modalContent: {
+    backgroundColor: "#fff",
+    padding: "10px",
+    borderRadius: "10px",
+    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+    width: "400px",
+    maxWidth: "90%",
   },
 };
 
