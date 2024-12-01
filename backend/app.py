@@ -623,90 +623,73 @@ def create_job_posting():
         if not data:
             logging.error("No JSON data received.")
             return jsonify({'error': 'No data provided'}), 400
-        
+
         logging.info("Received data: %s", data)
 
-        # Step 2: Validate required fields in the request body
+        # Step 2: Extract required fields
         company_name = data.get('company_name')
         job_description = data.get('job_description')
         role = data.get('role')
-        primary_skills = data.get('primary_skills')
-        secondary_skills = data.get('secondary_skills')
-        other_skills = data.get('other_skills')
-        package = data.get('package')
-        stipend_amount = data.get('stipend_amount')
+        primary_skills = data.get('primary_skills_name')
+        secondary_skills = data.get('secondary_skills_name')
+        other_skills = data.get('other_skills_name')
+        package = float(data.get('package', 0)) if data.get('package') else None
+        stipend_amount = float(data.get('stipend_amount', 0)) if data.get('stipend_amount') else None
 
         pri_skills_wt = data.get('pri_skills_wt')
         sec_skills_wt = data.get('sec_skills_wt')
         oth_skills_wt = data.get('oth_skills_wt')
-        pri_wm_skills_wt = data.get('pri_wm_skills_wt')
-        sec_wn_skills_wt = data.get('sec_wn_skills_wt')
-        pri_proj_skills_wt = data.get('pri_proj_skills_wt')
-        sec_proj_skills_wt = data.get('sec_proj_skills_wt')
-        fil_wt = data.get('fil_wt')
-        certi_wt = data.get('certi_wt')
-        hack_wt = data.get('hack_wt')
 
-        # Check for missing required fields and log them
-        required_fields = ['company_name', 'job_description', 'role', 'primary_skills']
+        # Step 3: Validate required fields
+        required_fields = ['company_name', 'job_description', 'role', 'primary_skills_name']
         missing_fields = [field for field in required_fields if not data.get(field)]
         if missing_fields:
             logging.error("Missing required fields: %s", missing_fields)
             return jsonify({'error': f'Missing required fields: {missing_fields}'}), 400
-
-        # Step 3: Validate numeric fields (package and stipend_amount) are of correct type
-        try:
-            # Ensure that package and stipend_amount are either None or valid floats
-            package = float(package) if package else None
-            stipend_amount = float(stipend_amount) if stipend_amount else None
-        except ValueError:
-            logging.error(f"Invalid data type for numeric fields: package - {package}, stipend_amount - {stipend_amount}")
-            return jsonify({'error': 'Package and stipend_amount must be valid numbers'}), 400
 
         # Step 4: Get the HR's user_id from the session
         user_id = session.get('user_id_hr')
         if not user_id:
             logging.error("User not logged in. HR user ID is missing.")
             return jsonify({'error': 'HR user must be logged in to create a job posting'}), 401
-        
+
         logging.info(f"Using HR user ID: {user_id} from session.")
 
         # Step 5: Connect to the database
         cursor = mysql.connection.cursor()
         logging.info("Database connection established successfully.")
 
-        # Step 6: Execute the database insert query for Job_Postings
+        # Step 6: Insert job posting into the database
         try:
             job_posting_query = '''INSERT INTO Job_Postings (user_id, title, description, primary_skills, secondary_skills, other_skills, company_name, package, stipend_amount) 
                                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)'''
             cursor.execute(job_posting_query, (user_id, role, job_description, primary_skills, secondary_skills, other_skills, company_name, package, stipend_amount))
-            job_id = cursor.lastrowid  # Retrieve the ID of the newly inserted job posting
-            
-            # Step 7: Insert data into the Weightages table
+            job_id = cursor.lastrowid
+
+            # Step 7: Insert weightages into the Weightages table
             weightages_query = '''INSERT INTO Weightages (job_id, pri_skills_wt, sec_skills_wt, oth_skills_wt, pri_wm_skills_wt, sec_wn_skills_wt, pri_proj_skills_wt, sec_proj_skills_wt, fil_wt, certi_wt, hack_wt) 
-                                  VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'''
-            cursor.execute(weightages_query, (job_id, pri_skills_wt, sec_skills_wt, oth_skills_wt, pri_wm_skills_wt, sec_wn_skills_wt, pri_proj_skills_wt, sec_proj_skills_wt, fil_wt, certi_wt, hack_wt))
-            
+                                  VALUES (%s, %s, %s, %s,  5, 3, 5, 3, 5, 5, 4)'''
+            cursor.execute(weightages_query, (job_id, pri_skills_wt, sec_skills_wt, oth_skills_wt))
+
             mysql.connection.commit()
             logging.info("Job posting and weightages created successfully in the database.")
             return jsonify({'message': 'Job posting and weightages created successfully'}), 201
-        
+
         except Exception as e:
-            # Step 8: Handle any database-related errors
+            # Step 8: Handle database errors
             mysql.connection.rollback()
             logging.error(f"Database insertion error: {str(e)}")
             return jsonify({'error': f"Database error: {str(e)}"}), 500
-        
+
         finally:
-            # Step 9: Ensure cursor is closed
+            # Step 9: Close the database cursor
             cursor.close()
             logging.info("Database cursor closed.")
 
     except Exception as e:
-        # Step 10: Catch any unexpected errors
+        # Step 10: Catch unexpected errors
         logging.error(f"An unexpected error occurred: {str(e)}")
         return jsonify({'error': f"An unexpected error occurred: {str(e)}"}), 500
-
 
 @app.route('/available-jobs', methods=['GET'])
 def fetch_available_jobs():

@@ -55,6 +55,7 @@ const StudentRankings = () => {
       console.error("Error during shortlisting:", error);
       setError("Error while shortlisting students.");
     }
+    window.location.reload();
   };
 
   return (
@@ -81,7 +82,10 @@ const StudentRankings = () => {
             </thead>
             <tbody>
               {students.map((student, index) => (
-                <tr key={student.sr_no} className={index % 2 === 0 ? "even-row" : ""}>
+                <tr
+                  key={student.sr_no}
+                  className={index % 2 === 0 ? "even-row" : ""}
+                >
                   <td>{student.sr_no}</td>
                   <td>{student.full_name}</td>
                   <td>{student.college_name}</td>
@@ -113,7 +117,9 @@ const StudentRankings = () => {
               <button
                 onClick={handleShortlist}
                 className="shortlist-button"
-                disabled={numCandidates === 0 || numCandidates > students.length}
+                disabled={
+                  numCandidates === 0 || numCandidates > students.length
+                }
               >
                 Shortlist
               </button>
