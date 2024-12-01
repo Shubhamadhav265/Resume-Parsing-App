@@ -100,7 +100,7 @@ const StudentRankings = () => {
           {!isShortlisted && (
             <div className="shortlist-form">
               <label>
-                Enter number of candidates to shortlist:
+                Enter candidate number to shortlist:
                 <select
                   value={numCandidates}
                   onChange={(e) => setNumCandidates(Number(e.target.value))}

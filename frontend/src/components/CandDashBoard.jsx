@@ -139,7 +139,9 @@ const CandDashBoard = () => {
             <p style={styles.noJobsText}>No applied jobs found.</p>
           )}
         </div>
-
+        <br />
+        <br />
+        <br />
         {/* Available Jobs Section */}
         <h2 style={styles.heading}>Available Jobs</h2>
         <div style={styles.jobContainer}>
