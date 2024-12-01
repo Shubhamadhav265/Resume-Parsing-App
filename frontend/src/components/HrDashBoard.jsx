@@ -18,7 +18,6 @@ const HRDashboard = () => {
       } catch (error) {
         console.error("Error fetching job postings:", error);
         setLoading(false);
-        navigate("/");
       }
     };
 

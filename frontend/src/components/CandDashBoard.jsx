@@ -24,7 +24,6 @@ const CandDashBoard = () => {
         setAppliedJobs(response.data);
       } catch (error) {
         console.error("Error fetching applied jobs:", error);
-        navigate("/");
       }
     };
 
@@ -202,7 +201,6 @@ const CandDashBoard = () => {
     </div>
   );
 };
-
 
 const styles = {
   navbar: {
