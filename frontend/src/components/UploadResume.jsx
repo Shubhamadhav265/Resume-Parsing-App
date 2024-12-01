@@ -10,6 +10,7 @@ const UploadResume = ({
   onClose,
 }) => {
   const [file, setFile] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
@@ -22,7 +23,7 @@ const UploadResume = ({
       setError("Please select a file to upload.");
       return;
     }
-
+    setLoading(true);
     const formData = new FormData();
     formData.append("file", file);
     formData.append("job_id", jobId);
@@ -51,12 +52,13 @@ const UploadResume = ({
 
       // Call the callback with job details to update the applied jobs
       onJobUploaded(jobDetails);
-
+      setLoading(false);
       navigate("/cand-dashboard", { replace: true });
       onClose();
     } catch (error) {
       console.error("Error uploading resume:", error);
       setError("Failed to upload resume.");
+      setLoading(false);
     }
   };
 
@@ -66,10 +68,21 @@ const UploadResume = ({
       <br />
       {error && <p style={styles.errorText}>{error}</p>}
       <input type="file" onChange={handleFileChange} />
-      <button onClick={handleUpload} style={styles.uploadButton}>
+      
+      {loading ? (
+        <>
+          <img width={50}
+            src="https://i.pinimg.com/originals/07/24/88/0724884440e8ddd0896ff557b75a222a.gif"
+            alt=""
+          />
+        </>
+      ) : (
+        <><button onClick={handleUpload} style={styles.uploadButton}>
         Upload
-      </button>
+      </button></>
+      )}
       <br />
+
       <button onClick={onClose} style={styles.closeButton}>
         Close
       </button>
