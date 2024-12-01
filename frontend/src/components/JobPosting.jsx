@@ -98,6 +98,7 @@ function JobPosting() {
     } catch (error) {
       console.error("Error:", error);
       setError(error.message);
+      navigate("/");
       setMessage("");
     }
   };

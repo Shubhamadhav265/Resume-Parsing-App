@@ -5,7 +5,9 @@ const Feedback = ({ feedback, onClose }) => {
         <div style={styles.modal}>
             <div style={styles.modalContent}>
                 <h4>Feedback for Job</h4>
+                <br />      
                 <p>{feedback}</p>
+                <br />
                 <button onClick={onClose} style={styles.closeModalButton}>
                     Close
                 </button>

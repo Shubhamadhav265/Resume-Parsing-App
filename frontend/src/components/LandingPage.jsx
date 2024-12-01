@@ -35,7 +35,7 @@ const LandingPage = () => {
             <a href="#services">Services</a>
           </li>
           <li>
-            <a href="#contact">Contact</a>
+            <a href="#contact">Sign In</a>
           </li>
         </ul>
       </nav>

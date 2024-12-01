@@ -6,7 +6,7 @@ const HRDashboard = () => {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-
+  
   useEffect(() => {
     const fetchJobs = async () => {
       try {
@@ -18,6 +18,7 @@ const HRDashboard = () => {
       } catch (error) {
         console.error("Error fetching job postings:", error);
         setLoading(false);
+        navigate("/");
       }
     };
 

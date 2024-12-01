@@ -63,11 +63,13 @@ const UploadResume = ({
   return (
     <div style={styles.modal}>
       <h3>Upload Resume</h3>
+      <br />
       {error && <p style={styles.errorText}>{error}</p>}
       <input type="file" onChange={handleFileChange} />
       <button onClick={handleUpload} style={styles.uploadButton}>
         Upload
       </button>
+      <br />
       <button onClick={onClose} style={styles.closeButton}>
         Close
       </button>

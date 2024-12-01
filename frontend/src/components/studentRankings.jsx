@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import "./studentRankings.css"; // Assuming the CSS is in the same directory or you can define it here.
+import { useNavigate } from "react-router-dom";
 
 const StudentRankings = () => {
   const { job_id } = useParams();
@@ -10,7 +11,8 @@ const StudentRankings = () => {
   const [numCandidates, setNumCandidates] = useState(0);
   const [isShortlisted, setIsShortlisted] = useState(false);
   const [error, setError] = useState("");
-
+  const navigate = useNavigate();
+  
   useEffect(() => {
     const fetchRankings = async () => {
       try {
@@ -36,6 +38,7 @@ const StudentRankings = () => {
         console.error("Error fetching student rankings:", error);
         setError("Failed to load student rankings.");
         setLoading(false);
+        navigate("/");
       }
     };
 
